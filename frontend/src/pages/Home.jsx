@@ -11,7 +11,7 @@ const checkRestaurantOpen = () => {
   const now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
   const openMinutes = 19 * 60;
-  const closeMinutes = 22 * 60 + 30;
+  const closeMinutes = 24 * 60 + 30;
   return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
 };
 

@@ -7,9 +7,31 @@ const Header = () => {
 
   const checkOpen = () => {
     const now = new Date();
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    const openMinutes = 19 * 60;
-    const closeMinutes = 23 * 60 + 30;
+    const day = now.getDay(); // 0 (domingo) a 6 (sábado)
+    const date = now.getDate();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const currentMinutes = hours * 60 + minutes;
+
+    const openMinutes = 19 * 60; // 19:00
+    const closeMinutes = 24 * 60; // 02:00
+
+    // Terça-feira (folga)
+    if (day === 2) return false;
+
+    // Penúltimo final de semana do mês (sábado e domingo)
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const penultimateWeekendStart = lastDay - 6;
+    const penultimateWeekendEnd = lastDay - 5;
+    if ((day === 6 && date === penultimateWeekendStart) || (day === 0 && date === penultimateWeekendEnd)) {
+      return false;
+    }
+
+    // Como closeMinutes (02:00) é menor que openMinutes (19:00), o restaurante fica aberto de 19:00 até 23:59 e também de 00:00 até 02:00
+    if (closeMinutes < openMinutes) {
+      return currentMinutes >= openMinutes || currentMinutes < closeMinutes;
+    }
+
     return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
   };
 
@@ -23,8 +45,12 @@ const Header = () => {
 
   return (
     <header
-      className="w-full h-[350px] bg-black bg- bg-cover  shadow-md"
-      style={{ backgroundImage: `url(${CoverImage})` }}
+      className="w-full h-[450px] bg-cover shadow-md"
+      style={{
+        backgroundImage: `url(${CoverImage})`,
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
     >
       <div className="w-full h-full flex justify-center items-center flex-col gap-2 bg-black/60">
         <img
@@ -32,17 +58,22 @@ const Header = () => {
           alt="Logo do projeto"
           className="p-2 w-36 h-36 object-cover rounded-full"
         />
-        <h1 className="capitalize text-4xl font-semibold text-white">South burguer</h1>
-        <span className="capitalize text-xl text-white font-medium">Rua 2024, Bagé</span>
-        <div
-          className={`px-4 py-2 rounded-lg mt-5 ${
-            isOpen ? 'bg-green-700' : 'bg-red-500'
-          }`}
-          id="date-span"
-        >
-          <span className="capitalize text-white font-medium">
-            seg à dom - 19:00 às 23:30 {isOpen ? '(Aberto)' : '(Fechado)'}
-          </span>
+        <h1 className="capitalize text-4xl font-semibold text-white">La burguer</h1>
+        <span className="capitalize text-xl text-white font-medium">
+          Av. Presidente Vargas 24, Bagé
+        </span>
+        <div className="p-4">
+          <div
+            className={`px-4 py-2 rounded-lg mt-5 ${
+              isOpen ? 'bg-green-700' : 'bg-red-500'
+            }`}
+            id="date-span"
+          >
+            <span className="capitalize text-white font-medium">
+              Quarta a segunda - 19:00 às 00:00 (Terças e penúltimo fim de semana do mês: fechado){' '}
+              {isOpen ? '(Aberto)' : '(Fechado)'}
+            </span>
+          </div>
         </div>
       </div>
     </header>

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 const ProductItem = ({ product, onSelect }) => {
   return (
     <div
-      className=" flex p-4 rounded-md shadow duration-200 hover:bg-[#f1f1f1] cursor-pointer"
+      className=" flex p-4 rounded-md shadow duration-200  cursor-pointer"
       onClick={() => onSelect(product)}
     >
       <img
