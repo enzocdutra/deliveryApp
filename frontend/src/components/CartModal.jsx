@@ -84,9 +84,10 @@ const CartModal = ({ isOpen, onClose }) => {
       }
     }
   
-    const message = encodeURIComponent(
-      `${cartItemsText}\n${paymentInfo}Total: R$${total.toFixed(2)}\nNome: ${clientName}\n${deliveryType === 'retirar' ? 'Endereço da Hamburgueria' : 'Endereço'}: ${endereco}\nMuito obrigado pela preferência!`
-    );
+  const message = encodeURIComponent(
+  `${cartItemsText}\n${paymentInfo}*💵 Total:* _R$ ${total.toFixed(2)}_\n*👤 Nome:* ${clientName}\n${deliveryType === 'retirar' ? '*📍 Endereço da Hamburgueria:*' : '*📍 Endereço:*'} ${endereco}\n\nMuito obrigado pela preferência!`
+);
+
   
     const phone = "5397082320";
     window.open(`https://wa.me/${phone}?text=${message}`, "_blank");

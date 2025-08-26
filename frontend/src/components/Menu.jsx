@@ -199,7 +199,11 @@ const Menu = () => {
   };
 
   return (
-    <div id="menu" className="bg-gray-100 min-h-screen py-6">
+    <div id="menu" className="bg-gray-100 min-h-screen ">
+        <div className='p-4 text-center mb-10 bg-black'>
+        <p className='text-red-600 text-3xl text-center'><strong>Atenção !</strong></p>
+        <span className='text-xl text-center text-white'>não fizemos trocas de um condimento por outro, entra como adicional!</span>
+        </div>
       <div className="container mx-auto px-4">
         <header className="text-center mb-10">
           <h1 className="text-4xl font-bold uppercase text-gray-800">Cardápio</h1>
