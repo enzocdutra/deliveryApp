@@ -67,24 +67,7 @@ export default function Admin() {
                       <span>Criar</span>
                     </Link>
                   </li>
-                  <li>
-                    <Link
-                      to="products/edit"
-                      className="flex items-center gap-2 p-1 hover:bg-white/20 rounded"
-                    >
-                      <FaEdit size={12} />
-                      <span>Editar</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="products/delete"
-                      className="flex items-center gap-2 p-1 hover:bg-white/20 rounded"
-                    >
-                      <FaTrash size={12} />
-                      <span>Excluir</span>
-                    </Link>
-                  </li>
+                 
                 </ul>
               )}
             </li>

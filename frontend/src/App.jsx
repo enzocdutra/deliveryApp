@@ -7,10 +7,7 @@ import Admin from './pages/Admin';
 import AllProducts from './pages/admin/AllProducts';
 import AllUsers from './pages/admin/users/AllUsers';
 import { CreateProducts } from './pages/admin/CreateProducts';
-import { EditProducts } from './pages/admin/EditProducts';
-import { DeleteProducts } from './pages/admin/DeleteProducts';
-import { EditUser } from './pages/admin/users/EditUser';
-import { DeleteUsers } from './pages/admin/users/DeleteUsers';
+
 // import { CreateUser } from './pages/admin/users/CreateUser';
 import Register from './pages/Register';
 const App = () => {
@@ -37,14 +34,9 @@ const App = () => {
           {/* Rotas de produtos */}
           <Route path="products" element={<AllProducts />} />
           <Route path="products/create" element={<CreateProducts />} />
-          <Route path="products/edit" element={<EditProducts />} />
-          <Route path="products/delete" element={<DeleteProducts />} />
+
           
-          {/* Rotas de usuários */}
-          <Route path="users" element={<AllUsers />} />
-          {/* <Route path="users/create" element={<CreateUser />} /> */}
-          <Route path="users/edit" element={<EditUser />} />
-          <Route path="users/delete" element={<DeleteUsers />} />
+
         </Route>
         
         {/* Rota para páginas não encontradas */}
