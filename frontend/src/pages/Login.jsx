@@ -1,20 +1,43 @@
-import React from "react";
-import CoverImage from "../assets/Capa.jpg"; // substitua pela imagem certa
+import { useState } from "react";
+import CoverImage from "../assets/Capa.jpg";
+import { loginUser } from "../services/Services";
 
 export default function Login() {
+  const [username, setUsername] = useState(""); // troquei de email -> username (pra bater com o backend)
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const data = await loginUser(username, password);
+
+      // salva token no localStorage para manter login
+      localStorage.setItem("token", data.token);
+
+      setMessage(`✅ Bem-vindo, ${username}!`);
+      setUsername("");
+      setPassword("");
+
+      // redirecionar depois de logar (ex: dashboard ou home)
+      // window.location.href = "/dashboard";
+    } catch (err) {
+      setMessage(err.response?.data?.error || "❌ Falha ao fazer login");
+    }
+  };
+
   return (
     <div className="w-full h-screen flex">
       {/* Lado esquerdo - banner */}
-<div className="hidden md:flex w-2/2 relative">
-  <img
-    src={CoverImage}
-    alt="Capa LaBurguer"
-    className="absolute inset-0 w-full h-full object-cover"
-  />
-  {/* Filtro preto */}
-  <div className="absolute inset-0 bg-black/60" />
-</div>
-
+      <div className="hidden md:flex w-2/2 relative">
+        <img
+          src={CoverImage}
+          alt="Capa LaBurguer"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Filtro preto */}
+        <div className="absolute inset-0 bg-black/60" />
+      </div>
 
       {/* Lado direito - form */}
       <div className="w-full md:w-1/2 flex items-center justify-center bg-gradient-to-br from-[#441704] to-[#b34b0a]">
@@ -23,15 +46,21 @@ export default function Login() {
           <p className="mb-6 text-sm opacity-80">
             Preencha os campos abaixo com seus dados de acesso.
           </p>
-          <form className="flex flex-col gap-4">
+          <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <input
-              type="email"
-              placeholder="Digite o seu e-mail"
+              type="text"
+              placeholder="Digite o seu usuário"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
               className="w-full p-3 rounded-lg bg-white/20 focus:bg-white/30 outline-none placeholder-white"
             />
             <input
               type="password"
               placeholder="Digite sua senha"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
               className="w-full p-3 rounded-lg bg-white/20 focus:bg-white/30 outline-none placeholder-white"
             />
             <button
@@ -40,8 +69,16 @@ export default function Login() {
             >
               Acessar
             </button>
-           
           </form>
+          {message && (
+            <p
+              className={`mt-4 text-center font-medium ${
+                message.startsWith("✅") ? "text-emerald-400" : "text-red-400"
+              }`}
+            >
+              {message}
+            </p>
+          )}
         </div>
       </div>
     </div>

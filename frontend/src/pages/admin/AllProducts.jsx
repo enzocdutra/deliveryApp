@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getProdutos } from "../../services/Services"; // importa o service
 
 export default function AllProducts() {
   const [produtos, setProdutos] = useState([]);
 
   // Buscar produtos no backend
   useEffect(() => {
-    fetch("http://localhost:5000/produtos")
-      .then((res) => res.json())
-      .then((data) => setProdutos(data))
-      .catch((err) => console.error("Erro ao carregar produtos:", err));
+    const fetchProdutos = async () => {
+      try {
+        const data = await getProdutos();
+        setProdutos(data);
+      } catch (err) {
+        console.error("Erro ao carregar produtos:", err);
+      }
+    };
+
+    fetchProdutos();
   }, []);
 
   return (

@@ -12,7 +12,7 @@ import { DeleteProducts } from './pages/admin/DeleteProducts';
 import { EditUser } from './pages/admin/users/EditUser';
 import { DeleteUsers } from './pages/admin/users/DeleteUsers';
 // import { CreateUser } from './pages/admin/users/CreateUser';
-
+import Register from './pages/Register';
 const App = () => {
   return (
     <Router>
@@ -27,6 +27,7 @@ const App = () => {
           } 
         />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         {/* Rotas do painel admin */}
         <Route path="/admin" element={<Admin />}>
