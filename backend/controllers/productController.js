@@ -18,17 +18,17 @@ export const getProduct = (req, res) => {
 };
 
 export const createProduct = (req, res) => {
-  const { nome, descricao, preco, imagem } = req.body;
+  const { nome, descricao, preco, categoria, imagem } = req.body;
 
-  if (!nome || !descricao || preco === undefined) {
-    return res.status(400).json({ error: "Campos obrigatórios: nome, descricao, preco." });
+  if (!nome || !descricao || preco === undefined || !categoria) {
+    return res.status(400).json({ error: "Campos obrigatórios: nome, descricao, preco, categoria." });
   }
 
   if (imagem && !isDataUrl(imagem)) {
     return res.status(400).json({ error: "Imagem deve estar em Data URL (base64)." });
   }
 
-  Product.create({ nome, descricao, preco, imagem }, (err, novo) => {
+  Product.create({ nome, descricao, preco, categoria, imagem }, (err, novo) => {
     if (err) return res.status(500).json({ error: "Erro ao criar produto." });
     res.status(201).json(novo);
   });
@@ -36,17 +36,17 @@ export const createProduct = (req, res) => {
 
 export const updateProduct = (req, res) => {
   const { id } = req.params;
-  const { nome, descricao, preco, imagem } = req.body;
+  const { nome, descricao, preco, categoria, imagem } = req.body;
 
-  if (!nome || !descricao || preco === undefined) {
-    return res.status(400).json({ error: "Campos obrigatórios: nome, descricao, preco." });
+  if (!nome || !descricao || preco === undefined || !categoria) {
+    return res.status(400).json({ error: "Campos obrigatórios: nome, descricao, preco, categoria." });
   }
 
   if (imagem && !isDataUrl(imagem)) {
     return res.status(400).json({ error: "Imagem deve estar em Data URL (base64)." });
   }
 
-  Product.update({ id, nome, descricao, preco, imagem }, (err, result) => {
+  Product.update({ id, nome, descricao, preco, categoria, imagem }, (err, result) => {
     if (err) return res.status(500).json({ error: "Erro ao atualizar produto." });
     if (result.changes === 0) return res.status(404).json({ error: "Produto não encontrado." });
     res.json(result);

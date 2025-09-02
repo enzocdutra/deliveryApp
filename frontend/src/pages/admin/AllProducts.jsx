@@ -10,12 +10,14 @@ export default function AllProducts() {
   const [produtoToEdit, setProdutoToEdit] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editFormData, setEditFormData] = useState({
-    nome: "",
-    descricao: "",
-    preco: "",
-    imagem: null
-  });
+const [editFormData, setEditFormData] = useState({
+  nome: "",
+  descricao: "",
+  preco: "",
+  imagem: null,
+  categoria: "" // nova chave
+});
+
 
   // Buscar produtos no backend
   useEffect(() => {
@@ -36,16 +38,18 @@ export default function AllProducts() {
     setShowDeleteModal(true);
   };
 
-  const handleEditClick = (produto) => {
-    setProdutoToEdit(produto);
-    setEditFormData({
-      nome: produto.nome,
-      descricao: produto.descricao,
-      preco: produto.preco.toString(),
-      imagem: produto.imagem
-    });
-    setShowEditModal(true);
-  };
+const handleEditClick = (produto) => {
+  setProdutoToEdit(produto);
+  setEditFormData({
+    nome: produto.nome,
+    descricao: produto.descricao,
+    preco: produto.preco.toString(),
+    imagem: produto.imagem,
+    categoria: produto.categoria || "" // categoria do produto
+  });
+  setShowEditModal(true);
+};
+
 
   const handleConfirmDelete = async () => {
     if (!produtoToDelete) return;
@@ -169,25 +173,29 @@ export default function AllProducts() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Imagem
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Produto
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Descrição
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Preço
-                  </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
+        <thead className="bg-gray-50">
+  <tr>
+    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+      Imagem
+    </th>
+    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+      Produto
+    </th>
+    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+      Descrição
+    </th>
+    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+      Categoria
+    </th>
+    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+      Preço
+    </th>
+    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+      Ações
+    </th>
+  </tr>
+</thead>
+
               <tbody className="divide-y divide-gray-100">
                 {produtos.map((produto) => (
                   <tr key={produto.id} className="hover:bg-gray-50 transition-colors duration-150">
@@ -230,7 +238,12 @@ export default function AllProducts() {
                         {produto.descricao}
                       </p>
                     </td>
-                    
+                    <td className="px-6 py-4">
+  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+    {produto.categoria || "—"}
+  </span>
+</td>
+
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
                         R$ {Number(produto.preco).toFixed(2).replace('.', ',')}
@@ -395,6 +408,23 @@ export default function AllProducts() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
                 />
               </div>
+<div>
+  <label className="block text-sm font-semibold text-gray-700 mb-2">Categoria *</label>
+  <select
+    name="categoria"
+    value={editFormData.categoria}
+    onChange={handleEditChange}
+    required
+    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+  >
+    <option value="">Selecione uma categoria</option>
+    <option value="Bebidas">Bebidas</option>
+    <option value="Lanches">Lanches</option>
+    <option value="Sobremesas">Sobremesas</option>
+    <option value="Combos">Combos</option>
+    {/* Adicione outras categorias conforme necessário */}
+  </select>
+</div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Imagem</label>

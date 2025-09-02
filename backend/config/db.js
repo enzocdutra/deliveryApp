@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename);
 const dbFile = path.join(__dirname, "..", "db.sqlite");
 const db = new sqlite3.Database(dbFile);
 
+
 // Cria tabela se não existir
 db.serialize(() => {
   db.run(`
@@ -16,10 +17,11 @@ db.serialize(() => {
       nome TEXT NOT NULL,
       descricao TEXT NOT NULL,
       preco REAL NOT NULL,
+      categoria TEXT NOT NULL,       -- 👈 novo campo
       imagem TEXT
     )
   `);
-  
+
   // Se quiser criar tabela de usuários para autenticação
   db.run(`
     CREATE TABLE IF NOT EXISTS usuarios (
@@ -29,5 +31,6 @@ db.serialize(() => {
     )
   `);
 });
+
 
 export default db;
