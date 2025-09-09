@@ -19,7 +19,15 @@ export const loginUser = async (username, password) => {
   const response = await axios.post(`${API_URL}/auth/login`, { username, password });
   return response.data; // { token }
 };
-
+// verificar token
+export const verifyToken = async (token) => {
+  const res = await axios.get(`${API_URL}/auth/verify`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
 // ================== PRODUTOS ==================
 
 // Listar produtos
@@ -49,6 +57,14 @@ export const updateProduto = async (id, produto) => {
 // Deletar produto
 export const deleteProduto = async (id) => {
   const response = await axios.delete(`${API_URL}/produtos/${id}`, {
+    headers: { Authorization: `Bearer ${getToken()}` },
+  });
+  return response.data;
+};
+
+// Listar produtos por categoria
+export const getProdutosByCategoria = async (categoria) => {
+  const response = await axios.get(`${API_URL}/produtos/category/${categoria}`, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
   return response.data;

@@ -1,19 +1,35 @@
 import React, { useState } from "react";
-import { FaBox, FaUsers, FaSignOutAlt, FaBars, FaPlus, FaEdit, FaTrash, FaChevronDown, FaChevronRight, FaList } from "react-icons/fa";
-import { Link, Outlet } from "react-router-dom";
+import {
+  FaBox,
+  FaUsers,
+  FaSignOutAlt,
+  FaBars,
+  FaPlus,
+  FaChevronDown,
+  FaChevronRight,
+  FaList
+} from "react-icons/fa";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 
 export default function Admin() {
   const [isOpen, setIsOpen] = useState(true);
   const [openSubmenus, setOpenSubmenus] = useState({
     products: false,
-    users: false
+    users: false,
   });
+
+  const navigate = useNavigate();
 
   const toggleSubmenu = (menu) => {
     setOpenSubmenus({
       ...openSubmenus,
-      [menu]: !openSubmenus[menu]
+      [menu]: !openSubmenus[menu],
     });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // remove o token salvo
+    navigate("/login"); // redireciona para login
   };
 
   return (
@@ -21,7 +37,7 @@ export default function Admin() {
       {/* Sidebar */}
       <aside
         className={`${
-          isOpen ? "w-64" : "w-20"
+          isOpen ? "w-64 h-full" : "w-20 h-full"
         } bg-gradient-to-br from-[#441704] to-[#b34b0a] text-white flex flex-col transition-all duration-300`}
       >
         <div className="p-6 text-2xl font-bold border-b border-white/20 flex items-center justify-between">
@@ -29,23 +45,26 @@ export default function Admin() {
         </div>
 
         {/* Menu */}
-        <nav className="flex-1 p-4">
+        <nav className="flex-1 p-4 h-screen">
           <ul className="space-y-3">
             {/* Produtos */}
             <li>
-              <div 
+              <div
                 className="flex items-center justify-between p-2 hover:bg-white/20 rounded-lg cursor-pointer"
-                onClick={() => toggleSubmenu('products')}
+                onClick={() => toggleSubmenu("products")}
               >
                 <div className="flex items-center gap-3">
                   <FaBox />
                   {isOpen && <span>Produtos</span>}
                 </div>
-                {isOpen && (
-                  openSubmenus.products ? <FaChevronDown size={14} /> : <FaChevronRight size={14} />
-                )}
+                {isOpen &&
+                  (openSubmenus.products ? (
+                    <FaChevronDown size={14} />
+                  ) : (
+                    <FaChevronRight size={14} />
+                  ))}
               </div>
-              
+
               {/* Submenu de Produtos */}
               {isOpen && openSubmenus.products && (
                 <ul className="ml-8 mt-2 space-y-2 border-l border-white/20 pl-3">
@@ -67,18 +86,18 @@ export default function Admin() {
                       <span>Criar</span>
                     </Link>
                   </li>
-                 
                 </ul>
               )}
             </li>
-
-       
           </ul>
         </nav>
 
         {/* Sair */}
         <div className="p-4 border-t border-white/20">
-          <button className="flex items-center gap-2 w-full text-left hover:text-red-400">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 w-full text-left hover:text-red-400"
+          >
             <FaSignOutAlt /> {isOpen && <span>Sair</span>}
           </button>
         </div>
@@ -95,11 +114,10 @@ export default function Admin() {
             <FaBars />
           </button>
           <h1 className="text-xl font-semibold text-gray-700">Dashboard</h1>
-   
         </header>
 
         {/* Aqui troca dinamicamente */}
-        <section className="p-6">
+        <section className="p-6 h-full">
           <Outlet />
         </section>
       </main>

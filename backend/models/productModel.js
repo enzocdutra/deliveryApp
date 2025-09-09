@@ -33,3 +33,7 @@ export const remove = (id, callback) => {
     callback(err, { changes: this.changes });
   });
 };
+
+export const getByCategory = (categoria, callback) => {
+  db.all("SELECT * FROM produtos WHERE categoria = ?", [categoria], callback);
+};

@@ -1,36 +1,27 @@
+// ProductItem.js
 import React from 'react';
-import PropTypes from 'prop-types';
 
 const ProductItem = ({ product, onSelect }) => {
   return (
-    <div
-      className=" flex p-4 rounded-md shadow duration-200  cursor-pointer"
+    <div 
+      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-105"
       onClick={() => onSelect(product)}
     >
-      <img
-        src={product.imageSrc}
-        alt={product.title}
-        className="w-[130px] h-40 object-cover rounded mb-2"
+      <img 
+        src={product.imagem} 
+        alt={product.nome}
+        className="w-full h-48 object-cover"
+        onError={(e) => {
+          e.target.src = '/caminho/para/imagem/padrao.jpg'; // Imagem padrão caso a do produto não carregue
+        }}
       />
-      <div className='flex flex-col p-4'>
-      <h3 className="text-lg font-bold">{product.title}</h3>
-      <p className="text-sm text-gray-600">{product.description}</p>
-      <p className="mt-2 font-semibold">R$ {product.price}</p>
+      <div className="p-4">
+        <h3 className="text-xl font-semibold text-gray-800">{product.nome}</h3>
+        <p className="text-gray-600 mt-2 line-clamp-2">{product.descricao}</p>
+        <p className="text-red-600 font-bold mt-2">R$ {product.preco.toFixed(2)}</p>
       </div>
-  
     </div>
   );
-};
-
-ProductItem.propTypes = {
-  product: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string,
-    price: PropTypes.string.isRequired,
-    imageSrc: PropTypes.string.isRequired,
-  }).isRequired,
-  onSelect: PropTypes.func.isRequired,
 };
 
 export default ProductItem;

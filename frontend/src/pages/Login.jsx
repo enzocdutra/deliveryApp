@@ -1,28 +1,32 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CoverImage from "../assets/Capa.jpg";
 import { loginUser } from "../services/Services";
 
 export default function Login() {
-  const [username, setUsername] = useState(""); // troquei de email -> username (pra bater com o backend)
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const data = await loginUser(username, password);
 
-      // salva token no localStorage para manter login
-      localStorage.setItem("token", data.token);
+      // Se o backend validar as credenciais, ele devolve o token
+      if (data?.token) {
+        localStorage.setItem("token", data.token);
 
-      setMessage(`✅ Bem-vindo, ${username}!`);
-      setUsername("");
-      setPassword("");
+        setMessage(`✅ Bem-vindo, ${username}!`);
+        setUsername("");
+        setPassword("");
 
-      // redirecionar depois de logar (ex: dashboard ou home)
-      // window.location.href = "/dashboard";
+        // redireciona para painel admin
+        navigate("/admin");
+      }
     } catch (err) {
-      setMessage(err.response?.data?.error || "❌ Falha ao fazer login");
+      setMessage(err.response?.data?.error || "❌ Usuário ou senha inválidos");
     }
   };
 
@@ -35,7 +39,6 @@ export default function Login() {
           alt="Capa LaBurguer"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Filtro preto */}
         <div className="absolute inset-0 bg-black/60" />
       </div>
 

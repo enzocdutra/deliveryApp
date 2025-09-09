@@ -17,6 +17,18 @@ const ItemModal = ({
   const [selectedExtras, setSelectedExtras] = useState([]);
   const [animate, setAnimate] = useState(false);
 
+ItemModal.propTypes = {
+  itemTitle: PropTypes.string.isRequired,
+  itemPrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  itemImage: PropTypes.string,
+  itemDescription: PropTypes.string,
+  onClose: PropTypes.func.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  itemCategory: PropTypes.string,
+};
+
+
+
   // Inicia a animação assim que o modal é montado
   useEffect(() => {
     setAnimate(true);
@@ -63,8 +75,10 @@ const ItemModal = ({
     { id: 29, name: "Doce de leite", price: 4.00 },
   ];
   
+const numericPrice = typeof itemPrice === "string"
+  ? parseFloat(itemPrice.replace(",", "."))
+  : Number(itemPrice);
 
-  const numericPrice = parseFloat(itemPrice.replace(',', '.'));
 
   // Calcula o valor total dos adicionais selecionados
   const extrasTotal = selectedExtras.reduce((acc, extra) => acc + extra.price, 0);

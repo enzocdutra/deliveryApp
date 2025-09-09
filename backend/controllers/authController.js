@@ -58,3 +58,19 @@ export const loginUser = (req, res) => {
     }
   });
 };
+// Verificar token
+export const verifyToken = (req, res) => {
+  try {
+    const authHeader = req.headers["authorization"];
+    if (!authHeader) return res.status(401).json({ error: "Token não fornecido" });
+
+    const token = authHeader.split(" ")[1]; // pega só o token
+    if (!token) return res.status(401).json({ error: "Token ausente" });
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    res.json({ valid: true, user: decoded }); // retorna usuário decodificado
+  } catch (err) {
+    res.status(401).json({ valid: false, error: "Token inválido ou expirado" });
+  }
+};

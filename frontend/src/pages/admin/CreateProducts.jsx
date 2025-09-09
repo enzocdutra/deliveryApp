@@ -96,12 +96,13 @@ const handleSubmit = async (e) => {
   className="w-full border rounded px-3 py-2 mb-3"
 >
   <option value="">Selecione...</option>
-  <option value="Combos">Normais</option>
+  <option value="Combos">Combos</option>
   <option value="Normais">Normais</option>
   <option value="Camarão">Camarão</option>
   <option value="Duplos">Duplos</option>
   <option value="Agridoce">Agridoce</option>
   <option value="Agridoces com Geleia">Agridoces com Geleia</option>
+  <option value="Doces">Doces</option>
   <option value="Petiscos">Petiscos</option>
   <option value="Bebidas">Bebidas</option>
 </select>
