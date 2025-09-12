@@ -22,32 +22,41 @@ const Menu = () => {
   const [produtos, setProdutos] = useState({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const carregarProdutos = async () => {
-      try {
-        const results = {};
-        for (let cat of categorias) {
-          const data = await getProdutosByCategoria(cat.nome);
-          
-          // Mapear os dados para garantir a estrutura correta
-          results[cat.nome] = data.map(item => ({
+useEffect(() => {
+  const carregarProdutos = async () => {
+    try {
+      // Faz todas as requisições em paralelo
+      const promises = categorias.map(async (cat) => {
+        const data = await getProdutosByCategoria(cat.nome);
+
+        return {
+          [cat.nome]: data.map((item) => ({
             id: item.id || item._id || Math.random().toString(36).substr(2, 9),
             nome: item.nome || item.name || item.title || "Produto sem nome",
             descricao: item.descricao || item.description || "",
             preco: item.preco || item.price || item.valor || 0,
             imagem: item.imagem || item.image || item.foto || item.img || "",
-            categoria: item.categoria || item.category || cat.nome
-          }));
-        }
-        setProdutos(results);
-      } catch (err) {
-        console.error('Erro ao carregar produtos:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    carregarProdutos();
-  }, []);
+            categoria: item.categoria || item.category || cat.nome,
+          })),
+        };
+      });
+
+      // Aguarda todas as categorias terminarem
+      const resultsArray = await Promise.all(promises);
+
+      // Junta todos os resultados em um único objeto
+      const results = resultsArray.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
+      setProdutos(results);
+    } catch (err) {
+      console.error("Erro ao carregar produtos:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  carregarProdutos();
+}, []);
 
   const openModal = (product) => setSelectedProduct(product);
   const closeModal = () => setSelectedProduct(null);
