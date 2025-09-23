@@ -20,10 +20,14 @@ export const registerUser = (req, res) => {
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      createUser({ username, password: hashedPassword }, (err, novo) => {
-        if (err) return res.status(500).json({ error: "Erro ao registrar usuário" });
-        res.status(201).json({ id: novo.id, username: novo.username });
-      });
+createUser({ username, password: hashedPassword }, (err, novo) => {
+  if (err) {
+    console.error("Erro ao registrar usuário:", err); // 🔎 log no console da Vercel
+    return res.status(500).json({ error: "Erro ao registrar usuário", details: err.message });
+  }
+  res.status(201).json({ id: novo.id, username: novo.username });
+});
+
     } catch (error) {
       res.status(500).json({ error: "Erro ao criptografar senha" });
     }

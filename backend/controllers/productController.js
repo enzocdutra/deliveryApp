@@ -35,10 +35,13 @@ export const createProduct = (req, res) => {
     return res.status(400).json({ error: "Imagem deve estar em Data URL (base64)." });
   }
 
-  Product.create({ nome, descricao, preco, categoria, imagem }, (err, novo) => {
-    if (err) return res.status(500).json({ error: "Erro ao criar produto." });
-    res.status(201).json(novo);
-  });
+Product.create({ nome, descricao, preco, categoria, imagem }, (err, novo) => {
+  if (err) {
+    console.error("Erro ao criar produto:", err); // 🔎 log no console da Vercel
+    return res.status(500).json({ error: "Erro ao criar produto", details: err.message });
+  }
+  res.status(201).json(novo);
+});
 };
 
 // Atualizar

@@ -167,7 +167,9 @@ const numericPrice = typeof itemPrice === "string"
             </div>
           </>
         )}
-
+  <div className='py-4 text-center bg-black'>
+          <p className='text-red-500'>Não mandamos maionese a parte</p>
+        </div>
         <label className="block mb-1 font-semibold text-sm md:text-base">Quantidade:</label>
         <div className="flex items-center gap-2 mb-4">
           <button
@@ -186,6 +188,7 @@ const numericPrice = typeof itemPrice === "string"
             +
           </button>
         </div>
+      
 
         <label className="block mb-1 font-semibold text-sm md:text-base">Observações:</label>
         <textarea
@@ -193,7 +196,7 @@ const numericPrice = typeof itemPrice === "string"
           rows="3"
           value={comments}
           onChange={e => setComments(e.target.value)}
-          placeholder="Ex: sem cebola, maionese à parte, etc."
+          placeholder="Ex: sem cebola, sem tomate, etc."
         />
 
         <button

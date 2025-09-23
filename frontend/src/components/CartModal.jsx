@@ -104,7 +104,7 @@ const CartModal = ({ isOpen, onClose }) => {
       className="bg-black/60 fixed inset-0 z-[9999] flex items-center justify-center overflow-auto p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-black p-5 rounded-md w-[90%] md:w-[700px] max-h-[90vh] overflow-y-auto">
+      <div className="bg-[#202020] p-5 rounded-md w-[90%] md:w-[700px] max-h-[90vh] overflow-y-auto">
         <h2 className="text-white font-bold text-center text-2xl mb-4">Seu Carrinho</h2>
 
         {cart.map((item, index) => (
@@ -268,8 +268,14 @@ const CartModal = ({ isOpen, onClose }) => {
           </>
         )}
 
-        <p className="text-[#ccc] italic">
-          Observação: Não servimos Maionese Caseira.
+        <p className="bg-black p-4 text-red-500 text-xl rounded-md mb-5 italic">
+          Observação:
+          <p>
+             Não servimos Maionese Caseira.
+          </p>
+          <p>
+              Tele Á consultar no whatssapp.
+          </p>
         </p>
         <div className="flex justify-center mt-4 gap-4">
           <button className="bg-green-500 py-2 px-4 rounded font-bold text-white hover:bg-green-600 transition" onClick={handleCheckout}>

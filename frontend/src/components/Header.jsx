@@ -13,9 +13,6 @@ const Header = () => {
     const minutes = now.getMinutes();
     const currentMinutes = hours * 60 + minutes;
 
-    const openMinutes = 19 * 60; // 19:00
-    const closeMinutes = 24 * 60; // 02:00
-
     // Terça-feira (folga)
     if (day === 2) return false;
 
@@ -27,12 +24,16 @@ const Header = () => {
       return false;
     }
 
-    // Como closeMinutes (02:00) é menor que openMinutes (19:00), o restaurante fica aberto de 19:00 até 23:59 e também de 00:00 até 02:00
-    if (closeMinutes < openMinutes) {
-      return currentMinutes >= openMinutes || currentMinutes < closeMinutes;
-    }
+    // Horários fixos: 12h00 - 14h00 e 19h00 - 00h00
+    const lunchStart = 12 * 60;
+    const lunchEnd = 14 * 60;
+    const dinnerStart = 19 * 60;
+    const dinnerEnd = 24 * 60; // até meia-noite
 
-    return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+    return (
+      (currentMinutes >= lunchStart && currentMinutes < lunchEnd) ||
+      (currentMinutes >= dinnerStart && currentMinutes < dinnerEnd)
+    );
   };
 
   useEffect(() => {
@@ -64,15 +65,12 @@ const Header = () => {
         </span>
         <div className="p-4">
           <div
-            className={`px-4 py-2 rounded-lg mt-5 ${
-              isOpen ? 'bg-green-700' : 'bg-red-500'
+            className={`px-6 py-3 rounded-lg mt-5 text-xl font-bold ${
+              isOpen ? 'bg-green-700 text-white' : 'bg-red-500 text-white'
             }`}
             id="date-span"
           >
-            <span className="capitalize text-white font-medium">
-              Quarta a segunda - 19:00 às 00:00 (Terças e penúltimo fim de semana do mês: fechado){' '}
-              {isOpen ? '(Aberto)' : '(Fechado)'}
-            </span>
+            {isOpen ? 'Aberto' : 'Fechado'}
           </div>
         </div>
       </div>
