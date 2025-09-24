@@ -97,6 +97,7 @@ const handleSubmit = async (e) => {
 >
   <option value="">Selecione...</option>
   <option value="Combos">Combos</option>
+  <option value="Alaminuta">Alaminuta</option>
   <option value="Normais">Normais</option>
   <option value="Camarão">Camarão</option>
   <option value="Duplos">Duplos</option>
