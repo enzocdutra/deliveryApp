@@ -1,36 +1,45 @@
-import sqlite3 from "sqlite3";
-import path from "path";
-import { fileURLToPath } from "url";
+import { Pool } from 'pg';
+import dotenv from 'dotenv';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+dotenv.config(); // ⚡ carrega .env antes de usar pool
 
-const dbFile = path.join(__dirname, "..", "db.sqlite");
-const db = new sqlite3.Database(dbFile);
-
-
-// Cria tabela se não existir
-db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS produtos (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nome TEXT NOT NULL,
-      descricao TEXT NOT NULL,
-      preco REAL NOT NULL,
-      categoria TEXT NOT NULL,       -- 👈 novo campo
-      imagem TEXT
-    )
-  `);
-
-  // Se quiser criar tabela de usuários para autenticação
-  db.run(`
-    CREATE TABLE IF NOT EXISTS usuarios (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL
-    )
-  `);
+// Configuração da pool com SSL obrigatório para Neon
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
 });
 
+// Função para criar tabelas
+export async function setupDatabase() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS produtos (
+        id SERIAL PRIMARY KEY,
+        nome VARCHAR(255) NOT NULL,
+        descricao TEXT NOT NULL,
+        preco DECIMAL(10,2) NOT NULL,
+        categoria VARCHAR(100) NOT NULL,
+        imagem TEXT
+      )
+    `);
 
-export default db;
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS usuarios (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(100) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL
+      )
+    `);
+
+    console.log('✅ Tabelas criadas/verificadas com sucesso!');
+  } catch (error) {
+    console.error('❌ Erro ao criar tabelas:', error);
+  }
+}
+
+// Teste de conexão
+pool.connect()
+  .then(() => console.log('✅ Conectado ao PostgreSQL Neon com sucesso!'))
+  .catch(err => console.error('❌ Erro ao conectar no PostgreSQL:', err));
+
+export default pool;

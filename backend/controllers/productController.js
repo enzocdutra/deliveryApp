@@ -2,25 +2,34 @@ import * as Product from "../models/productModel.js";
 import { isDataUrl } from "../utils/imageBase64.js";
 
 // Listar todos
-export const listProducts = (req, res) => {
-  Product.getAll((err, rows) => {
-    if (err) return res.status(500).json({ error: "Erro ao listar produtos." });
-    res.json(rows);
-  });
+export const listProducts = async (req, res) => {
+  try {
+    const products = await Product.getAll();
+    res.json(products);
+  } catch (err) {
+    console.error("Erro ao listar produtos:", err);
+    res.status(500).json({ error: "Erro ao listar produtos." });
+  }
 };
 
 // Buscar por ID
-export const getProduct = (req, res) => {
+export const getProduct = async (req, res) => {
   const { id } = req.params;
-  Product.getById(id, (err, row) => {
-    if (err) return res.status(500).json({ error: "Erro ao buscar produto." });
-    if (!row) return res.status(404).json({ error: "Produto não encontrado." });
-    res.json(row);
-  });
+  
+  try {
+    const product = await Product.getById(id);
+    if (!product) {
+      return res.status(404).json({ error: "Produto não encontrado." });
+    }
+    res.json(product);
+  } catch (err) {
+    console.error("Erro ao buscar produto:", err);
+    res.status(500).json({ error: "Erro ao buscar produto." });
+  }
 };
 
 // Criar
-export const createProduct = (req, res) => {
+export const createProduct = async (req, res) => {
   const { nome, descricao, preco, categoria, imagem } = req.body;
 
   if (!nome || !descricao || preco === undefined || !categoria) {
@@ -35,17 +44,20 @@ export const createProduct = (req, res) => {
     return res.status(400).json({ error: "Imagem deve estar em Data URL (base64)." });
   }
 
-Product.create({ nome, descricao, preco, categoria, imagem }, (err, novo) => {
-  if (err) {
-    console.error("Erro ao criar produto:", err); // 🔎 log no console da Vercel
-    return res.status(500).json({ error: "Erro ao criar produto", details: err.message });
+  try {
+    const novoProduto = await Product.create({ nome, descricao, preco, categoria, imagem });
+    res.status(201).json(novoProduto);
+  } catch (err) {
+    console.error("Erro ao criar produto:", err);
+    res.status(500).json({ 
+      error: "Erro ao criar produto", 
+      details: err.message 
+    });
   }
-  res.status(201).json(novo);
-});
 };
 
 // Atualizar
-export const updateProduct = (req, res) => {
+export const updateProduct = async (req, res) => {
   const { id } = req.params;
   const { nome, descricao, preco, categoria, imagem } = req.body;
 
@@ -61,33 +73,52 @@ export const updateProduct = (req, res) => {
     return res.status(400).json({ error: "Imagem deve estar em Data URL (base64)." });
   }
 
-  Product.update({ id, nome, descricao, preco, categoria, imagem }, (err, result) => {
-    if (err) return res.status(500).json({ error: "Erro ao atualizar produto." });
-    if (result.changes === 0) return res.status(404).json({ error: "Produto não encontrado." });
+  try {
+    const result = await Product.update({ id, nome, descricao, preco, categoria, imagem });
+    
+    if (result.changes === 0) {
+      return res.status(404).json({ error: "Produto não encontrado." });
+    }
 
-    // Buscar produto atualizado
-    Product.getById(id, (err, row) => {
-      if (err) return res.status(500).json({ error: "Erro ao buscar produto atualizado." });
-      res.json(row);
-    });
-  });
+    // Retorna o produto atualizado
+    if (result.product) {
+      res.json(result.product);
+    } else {
+      // Se não retornou o produto, busca novamente
+      const updatedProduct = await Product.getById(id);
+      res.json(updatedProduct);
+    }
+  } catch (err) {
+    console.error("Erro ao atualizar produto:", err);
+    res.status(500).json({ error: "Erro ao atualizar produto." });
+  }
 };
 
 // Deletar
-export const deleteProduct = (req, res) => {
+export const deleteProduct = async (req, res) => {
   const { id } = req.params;
-  Product.remove(id, (err, result) => {
-    if (err) return res.status(500).json({ error: "Erro ao excluir produto." });
-    if (result.changes === 0) return res.status(404).json({ error: "Produto não encontrado." });
+  
+  try {
+    const result = await Product.remove(id);
+    if (result.changes === 0) {
+      return res.status(404).json({ error: "Produto não encontrado." });
+    }
     res.status(200).json({ message: "Produto excluído com sucesso" });
-  });
+  } catch (err) {
+    console.error("Erro ao excluir produto:", err);
+    res.status(500).json({ error: "Erro ao excluir produto." });
+  }
 };
 
 // Listar por categoria
-export const listProductsByCategory = (req, res) => {
+export const listProductsByCategory = async (req, res) => {
   const { categoria } = req.params;
-  Product.getByCategory(categoria, (err, rows) => {
-    if (err) return res.status(500).json({ error: "Erro ao listar produtos por categoria." });
-    res.json(rows);
-  });
+  
+  try {
+    const products = await Product.getByCategory(categoria);
+    res.json(products);
+  } catch (err) {
+    console.error("Erro ao listar produtos por categoria:", err);
+    res.status(500).json({ error: "Erro ao listar produtos por categoria." });
+  }
 };

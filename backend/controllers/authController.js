@@ -6,62 +6,69 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
 
 // Registrar usuário
-export const registerUser = (req, res) => {
+export const registerUser = async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
     return res.status(400).json({ error: "Campos obrigatórios: username, password" });
   }
 
-  getUserByUsername(username, async (err, user) => {
-    if (err) return res.status(500).json({ error: "Erro ao verificar usuário" });
-    if (user) return res.status(400).json({ error: "Usuário já existe" });
-
-    try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-createUser({ username, password: hashedPassword }, (err, novo) => {
-  if (err) {
-    console.error("Erro ao registrar usuário:", err); // 🔎 log no console da Vercel
-    return res.status(500).json({ error: "Erro ao registrar usuário", details: err.message });
-  }
-  res.status(201).json({ id: novo.id, username: novo.username });
-});
-
-    } catch (error) {
-      res.status(500).json({ error: "Erro ao criptografar senha" });
+  try {
+    // Verifica se usuário já existe
+    const existingUser = await getUserByUsername(username);
+    if (existingUser) {
+      return res.status(400).json({ error: "Usuário já existe" });
     }
-  });
+
+    // Criptografa a senha e cria usuário
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await createUser({ username, password: hashedPassword });
+    
+    res.status(201).json({ id: newUser.id, username: newUser.username });
+  } catch (error) {
+    console.error("Erro ao registrar usuário:", error);
+    res.status(500).json({ 
+      error: "Erro ao registrar usuário", 
+      details: error.message 
+    });
+  }
 };
 
 // Login
-export const loginUser = (req, res) => {
+export const loginUser = async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
     return res.status(400).json({ error: "Campos obrigatórios: username, password" });
   }
 
-  getUserByUsername(username, async (err, user) => {
-    if (err) return res.status(500).json({ error: "Erro ao buscar usuário" });
-    if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
-
-    try {
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return res.status(401).json({ error: "Senha inválida" });
-
-      const token = jwt.sign(
-        { id: user.id, username: user.username },
-        JWT_SECRET,
-        { expiresIn: "1h" }
-      );
-
-      res.json({ token });
-    } catch (error) {
-      res.status(500).json({ error: "Erro ao validar senha" });
+  try {
+    // Busca usuário
+    const user = await getUserByUsername(username);
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
     }
-  });
+
+    // Verifica senha
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Senha inválida" });
+    }
+
+    // Gera token
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.json({ token });
+  } catch (error) {
+    console.error("Erro no login:", error);
+    res.status(500).json({ error: "Erro ao fazer login" });
+  }
 };
+
 // Verificar token
 export const verifyToken = (req, res) => {
   try {
