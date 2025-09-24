@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // URL do backend
-const API_URL = "http://localhost:5000";
+const API_URL = "https://delivery-app-wz6e.vercel.app";
 
 // Função para pegar o token salvo
 const getToken = () => localStorage.getItem("token");
@@ -32,21 +32,29 @@ export const verifyToken = async (token) => {
 
 // Listar produtos
 export const getProdutos = async () => {
-  const response = await axios.get(`${API_URL}/produtos`, {
+  const response = await axios.get(`${API_URL}/produtos/`, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
   return response.data;
 };
 
-// Criar produto
+// Buscar produto por ID
+export const getProduto = async (id) => {
+  const response = await axios.get(`${API_URL}/produtos/${id}`, {
+    headers: { Authorization: `Bearer ${getToken()}` },
+  });
+  return response.data;
+};
+
+// Criar produto - CORRIGIDO (removido /create)
 export const createProduto = async (produto) => {
-  const response = await axios.post(`${API_URL}/produtos/create`, produto, {
+  const response = await axios.post(`${API_URL}/produtos/`, produto, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
   return response.data;
 };
 
-// Atualizar produto
+// Atualizar produto - CORRIGIDO (mantido igual, está correto)
 export const updateProduto = async (id, produto) => {
   const response = await axios.put(`${API_URL}/produtos/${id}`, produto, {
     headers: { Authorization: `Bearer ${getToken()}` },
@@ -54,7 +62,7 @@ export const updateProduto = async (id, produto) => {
   return response.data;
 };
 
-// Deletar produto
+// Deletar produto - CORRIGIDO (mantido igual, está correto)
 export const deleteProduto = async (id) => {
   const response = await axios.delete(`${API_URL}/produtos/${id}`, {
     headers: { Authorization: `Bearer ${getToken()}` },
@@ -62,9 +70,9 @@ export const deleteProduto = async (id) => {
   return response.data;
 };
 
-// Listar produtos por categoria
+// Listar produtos por categoria - CORRIGIDO (ajustado o path)
 export const getProdutosByCategoria = async (categoria) => {
-  const response = await axios.get(`${API_URL}/produtos/category/${categoria}`, {
+  const response = await axios.get(`${API_URL}/produtos/categoria/${categoria}`, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
   return response.data;
