@@ -3,10 +3,10 @@ import dotenv from 'dotenv';
 
 dotenv.config(); // ⚡ carrega .env antes de usar pool
 
-// Configuração da pool com SSL obrigatório para Neon
+// Conexão com PostgreSQL local (Docker)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  // 🔹 SSL só é necessário no Neon, local pode deixar sem
 });
 
 // Função para criar tabelas
@@ -39,7 +39,7 @@ export async function setupDatabase() {
 
 // Teste de conexão
 pool.connect()
-  .then(() => console.log('✅ Conectado ao PostgreSQL Neon com sucesso!'))
+  .then(() => console.log('✅ Conectado ao PostgreSQL local com sucesso!'))
   .catch(err => console.error('❌ Erro ao conectar no PostgreSQL:', err));
 
 export default pool;

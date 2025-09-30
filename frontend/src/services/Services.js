@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // URL do backend
-const API_URL = "https://delivery-app-wz6e.vercel.app";
+const API_URL = "http://localhost:5000";
 
 // Função para pegar o token salvo
 const getToken = () => localStorage.getItem("token");
