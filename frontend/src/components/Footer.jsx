@@ -7,7 +7,7 @@ const Footer = ({ onCartClick, cartCount, totalPrice = 0, isCartOpen = false }) 
   return (
     <>
       {/* Botão Flutuante Único - Funciona em Mobile e Desktop */}
-      <div className="fixed bottom-6 left-6 z-50">
+      <div className="fixed bottom-6 left-6 z-50 ">
         <button 
           className={`
             relative bg-gradient-to-br from-green-500 to-green-600 

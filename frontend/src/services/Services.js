@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // URL do backend
-const API_URL = "http://localhost:5000";
+const API_URL = "https://picking-pennsylvania-forecasts-commonwealth.trycloudflare.com";
 
 // Função para pegar o token salvo
 const getToken = () => localStorage.getItem("token");

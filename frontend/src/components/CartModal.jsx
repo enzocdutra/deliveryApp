@@ -146,6 +146,16 @@ const CartModal = ({ isOpen, onClose }) => {
       ? `📍 Entrega: ${address}, ${neighborhood}${complement ? ` - ${complement}` : ''}`
       : "🏠 Retirada no local - Av. Presidente Vargas 24";
 
+    // Informações de pagamento para ambos os tipos
+    let pagamentoText = "";
+    if (paymentMethod === 'pix') {
+      pagamentoText = "💳 Pagamento: PIX";
+    } else if (paymentMethod === 'cartoes') {
+      pagamentoText = `💳 Pagamento: Cartão ${cardType === 'debito' ? 'Débito' : 'Crédito'}${cardBrand ? ` (${cardBrand})` : ''}`;
+    } else if (paymentMethod === 'dinheiro') {
+      pagamentoText = `💵 Pagamento: Dinheiro${changeFor ? ` - Troco para R$ ${changeFor}` : ''}`;
+    }
+
     return `📢 *NOVO PEDIDO - ${new Date().toLocaleDateString('pt-BR')}* 📢
 
 🍽️ Pedido:
@@ -156,6 +166,8 @@ ${cartItemsText}
 🙍‍♂️ Cliente: ${clientName}
 
 ${enderecoText}
+
+${pagamentoText}
 
 _Pedido via cardapiolaburguer.netlify.app_`;
   };
@@ -180,24 +192,26 @@ _Pedido via cardapiolaburguer.netlify.app_`;
         return;
       }
 
+      // Validações para entrega
       if (deliveryType === 'entrega') {
         if (!address.trim()) {
           showAlert("📍 Informe o endereço para entrega", 'error');
           setIsSubmitting(false);
           return;
         }
-        
-        if (paymentMethod === 'dinheiro' && !changeFor.trim()) {
-          showAlert("💵 Informe para quanto precisa de troco", 'error');
-          setIsSubmitting(false);
-          return;
-        }
-        
-        if (paymentMethod === 'cartoes' && !cardBrand.trim()) {
-          showAlert("💳 Informe a bandeira do cartão", 'error');
-          setIsSubmitting(false);
-          return;
-        }
+      }
+
+      // Validações de pagamento (agora aplicam-se para ambos os tipos)
+      if (paymentMethod === 'dinheiro' && !changeFor.trim()) {
+        showAlert("💵 Informe para quanto precisa de troco", 'error');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (paymentMethod === 'cartoes' && !cardBrand.trim()) {
+        showAlert("💳 Informe a bandeira do cartão", 'error');
+        setIsSubmitting(false);
+        return;
       }
 
       // Prepara a mensagem
@@ -431,57 +445,60 @@ _Pedido via cardapiolaburguer.netlify.app_`;
                   </div>
                 )}
 
-                {/* Pagamento */}
-                {deliveryType === 'entrega' && (
-                  <div>
-                    <label className="block font-semibold mb-2 text-gray-800">💳 Forma de Pagamento</label>
-                    <select 
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
-                      value={paymentMethod}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      disabled={isSubmitting}
-                    >
-                      <option value="pix">PIX</option>
-                      <option value="cartoes">Cartão</option>
-                      <option value="dinheiro">Dinheiro</option>
-                    </select>
+                {/* Pagamento - AGORA DISPONÍVEL PARA AMBOS OS TIPOS */}
+                <div>
+                  <label className="block font-semibold mb-2 text-gray-800">💳 Forma de Pagamento</label>
+                  <select 
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    disabled={isSubmitting}
+                  >
+                    <option value="pix">PIX</option>
+                    <option value="cartoes">Cartão</option>
+                    <option value="dinheiro">Dinheiro</option>
+                  </select>
 
-                    {paymentMethod === 'cartoes' && (
-                      <div className="mt-3 space-y-3">
-                        <select 
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
-                          value={cardType}
-                          onChange={(e) => setCardType(e.target.value)}
-                          disabled={isSubmitting}
-                        >
-                          <option value="debito">Débito</option>
-                          <option value="credito">Crédito</option>
-                        </select>
-                        <input
-                          type="text"
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
-                          placeholder="Bandeira do cartão"
-                          value={cardBrand}
-                          onChange={(e) => setCardBrand(e.target.value)}
-                          disabled={isSubmitting}
-                        />
-                      </div>
-                    )}
+                  {paymentMethod === 'cartoes' && (
+                    <div className="mt-3 space-y-3">
+                      <select 
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
+                        value={cardType}
+                        onChange={(e) => setCardType(e.target.value)}
+                        disabled={isSubmitting}
+                      >
+                        <option value="debito">Débito</option>
+                        <option value="credito">Crédito</option>
+                      </select>
+                      <input
+                        type="text"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
+                        placeholder="Bandeira do cartão (Ex: Visa, Mastercard)"
+                        value={cardBrand}
+                        onChange={(e) => setCardBrand(e.target.value)}
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                  )}
 
-                    {paymentMethod === 'dinheiro' && (
-                      <div className="mt-3">
-                        <input
-                          type="text"
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
-                          placeholder="Troco para quanto? Ex: 50,00"
-                          value={changeFor}
-                          onChange={(e) => setChangeFor(e.target.value)}
-                          disabled={isSubmitting}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
+                  {paymentMethod === 'dinheiro' && (
+                    <div className="mt-3">
+                      <input
+                        type="text"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
+                        placeholder={deliveryType === 'entrega' ? "Troco para quanto? Ex: 50,00" : "Valor em dinheiro para pagamento"}
+                        value={changeFor}
+                        onChange={(e) => setChangeFor(e.target.value)}
+                        disabled={isSubmitting}
+                      />
+                      <p className="text-xs text-gray-600 mt-1">
+                        {deliveryType === 'entrega' 
+                          ? "Informe para quanto precisa de troco" 
+                          : "Informe o valor em dinheiro que irá pagar"}
+                      </p>
+                    </div>
+                  )}
+                </div>
 
                 {/* Informações importantes */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

@@ -41,7 +41,7 @@ const Home = () => {
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <div>
+    <div className='w-full h-screen'>
       <Header />
       <Menu onAddToCart={addToCart} />
       <CartModal
@@ -50,8 +50,10 @@ const Home = () => {
         cart={cart}
         setCart={setCart}
       />
-      <Footer onCartClick={openCart} cartCount={cartCount} />
       <ToastContainer />
+      <div className='bg-gray-100'>
+      <Footer onCartClick={openCart} cartCount={cartCount} />
+      </div>
     </div>
   );
 };
