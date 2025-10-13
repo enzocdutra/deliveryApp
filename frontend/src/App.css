@@ -40,3 +40,10 @@
 .read-the-docs {
   color: #888;
 }
+
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+}
+.scroll-snap-item {
+  scroll-snap-align: center;
+}
