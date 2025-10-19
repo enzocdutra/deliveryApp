@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // URL do backend
-const API_URL = "https://prozac-degree-laptop-politics.trycloudflare.com";
+const API_URL = "   https://speaking-holding-diy-travesti.trycloudflare.com";
 
 // Função para pegar o token salvo
 const getToken = () => localStorage.getItem("token");
