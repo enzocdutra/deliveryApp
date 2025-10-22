@@ -1,9 +1,9 @@
 [build]
-builder = "Docker"
+root = "backend"
+
+[deploy]
+startCommand = "node server.js"
 
 [env]
 NODE_ENV = "production"
-
-[deploy]
-root = "backend"
-startCommand = "node server.js"
+PORT = "8080"
