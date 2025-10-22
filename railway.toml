@@ -1,9 +1,0 @@
-[build]
-root = "backend"
-
-[deploy]
-startCommand = "node server.js"
-
-[env]
-NODE_ENV = "production"
-PORT = "8080"
