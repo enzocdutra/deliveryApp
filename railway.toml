@@ -1,0 +1,9 @@
+[build]
+builder = "Docker"
+
+[env]
+NODE_ENV = "production"
+
+[deploy]
+root = "backend"
+startCommand = "node server.js"

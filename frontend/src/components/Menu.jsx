@@ -29,6 +29,50 @@ const Menu = () => {
   const categoryNavRef = useRef(null);
   const categoryRefs = useRef({});
 
+  // Função para verificar se está no horário das alaminutas (11h às 14h)
+  const isAlaminutaTime = useCallback(() => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentTime = currentHour + currentMinute / 60;
+    
+    // Horário das alaminutas: das 11h00 às 14h00
+    const startTime = 11; // 11:00
+    const endTime = 14;   // 14:00
+    
+    return currentTime >= startTime && currentTime < endTime;
+  }, []);
+
+  // Filtrar categorias baseado no horário
+  const getFilteredCategories = useCallback(() => {
+    const shouldShowAlaminuta = isAlaminutaTime();
+    
+    return categorias.filter(cat => {
+      if (cat.nome === 'Alaminuta') {
+        return shouldShowAlaminuta;
+      }
+      return true;
+    });
+  }, [isAlaminutaTime]);
+
+  const [filteredCategories, setFilteredCategories] = useState(getFilteredCategories());
+
+  // Atualizar categorias filtradas quando o horário mudar
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newFilteredCategories = getFilteredCategories();
+      setFilteredCategories(newFilteredCategories);
+      
+      // Se a categoria ativa atual for Alaminuta e não estiver mais no horário,
+      // mudar para a primeira categoria disponível
+      if (activeCategory === 'Alaminuta' && !isAlaminutaTime()) {
+        setActiveCategory(newFilteredCategories[0]?.nome || 'Combos');
+      }
+    }, 60000); // Verifica a cada minuto
+
+    return () => clearInterval(interval);
+  }, [getFilteredCategories, isAlaminutaTime, activeCategory]);
+
   // Verificar se precisa de scroll horizontal
   useEffect(() => {
     const checkScroll = () => {
@@ -42,7 +86,7 @@ const Menu = () => {
     window.addEventListener('resize', checkScroll);
     
     return () => window.removeEventListener('resize', checkScroll);
-  }, []);
+  }, [filteredCategories]); // Adicionar filteredCategories como dependência
 
   // Scroll horizontal para categorias
   const scrollCategories = (direction) => {
@@ -107,7 +151,7 @@ const Menu = () => {
 
       try {
         // Carrega categorias prioritárias primeiro (Combos, Bebidas, Normais)
-        const categoriasPrioritarias = categorias.filter(cat => 
+        const categoriasPrioritarias = filteredCategories.filter(cat => 
           ['Combos', 'Bebidas', 'Normais'].includes(cat.nome)
         );
 
@@ -115,7 +159,7 @@ const Menu = () => {
         await Promise.all(categoriasPrioritarias.map(cat => carregarCategoria(cat)));
 
         // Depois carrega o restante em background
-        const categoriasRestantes = categorias.filter(cat => 
+        const categoriasRestantes = filteredCategories.filter(cat => 
           !['Combos', 'Bebidas', 'Normais'].includes(cat.nome)
         );
 
@@ -130,7 +174,7 @@ const Menu = () => {
     };
 
     carregarProdutosOtimizado();
-  }, [carregarCategoria]);
+  }, [carregarCategoria, filteredCategories]);
 
   // Função para scroll suave até a categoria
   const scrollToCategory = useCallback((categoryNome) => {
@@ -179,6 +223,27 @@ const Menu = () => {
         ))}
       </div>
     </section>
+  );
+
+  // Componente para mostrar mensagem quando alaminutas não estão disponíveis
+  const AlaminutaUnavailableMessage = () => (
+    <div className="text-center py-12 bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl shadow-sm border-2 border-dashed border-orange-200 mb-8">
+      <div className="text-6xl mb-4">⏰</div>
+      <h3 className="text-2xl font-bold text-orange-800 mb-2">
+        Alaminutas Disponíveis apenas no Horário de Almoço
+      </h3>
+      <p className="text-orange-600 text-lg mb-4">
+        Nosso cardápio de alaminutas está disponível das <strong>11h00 às 14h00</strong>
+      </p>
+      <div className="bg-white/80 rounded-lg p-4 inline-block">
+        <p className="text-gray-700 font-medium">
+          Horário atual: <span className="text-orange-600">{new Date().toLocaleTimeString('pt-BR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          })}</span>
+        </p>
+      </div>
+    </div>
   );
 
   if (loading) {
@@ -271,29 +336,28 @@ const Menu = () => {
             )}
 
             {/* Container das categorias com scroll horizontal */}
-   <div ref={categoryNavRef} className="flex overflow-x-auto scrollbar-hide gap-3 scroll-snap-x">
-              {categorias.map((cat) => {
+            <div ref={categoryNavRef} className="flex overflow-x-auto scrollbar-hide gap-3 scroll-snap-x">
+              {filteredCategories.map((cat) => {
                 const isLoading = loadingCategories.has(cat.nome);
                 const produtosCategoria = produtos[cat.nome] || [];
                 const temProdutos = produtosCategoria.length > 0;
                 
                 return (
-                      <div key={cat.nome} className="scroll-snap-item">
-                <button
-  key={cat.nome}
-  onClick={() => scrollToCategory(cat.nome)}
-  disabled={!temProdutos || isLoading}
-  className={`flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full transition-all duration-300 font-medium whitespace-nowrap
-    ${activeCategory === cat.nome
-      ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-md scale-105'
-      : 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:shadow-sm'}
-    ${!temProdutos || isLoading ? 'opacity-50 cursor-not-allowed' : ''}
-  `}
->
-  <span className="text-lg">{cat.icone}</span>
-  <span className="hidden sm:inline">{cat.titulo}</span>
-</button>
-   </div>
+                  <div key={cat.nome} className="scroll-snap-item">
+                    <button
+                      onClick={() => scrollToCategory(cat.nome)}
+                      disabled={!temProdutos || isLoading}
+                      className={`flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full transition-all duration-300 font-medium whitespace-nowrap
+                        ${activeCategory === cat.nome
+                          ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white shadow-md scale-105'
+                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:shadow-sm'}
+                        ${!temProdutos || isLoading ? 'opacity-50 cursor-not-allowed' : ''}
+                      `}
+                    >
+                      <span className="text-lg">{cat.icone}</span>
+                      <span className="hidden sm:inline">{cat.titulo}</span>
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -309,7 +373,7 @@ const Menu = () => {
 
         {/* Lista de Produtos por Categoria */}
         <div className="space-y-12 sm:space-y-16 px-2 sm:px-0">
-          {categorias.map((cat) => {
+          {filteredCategories.map((cat) => {
             const isLoading = loadingCategories.has(cat.nome);
             const produtosCategoria = produtos[cat.nome] || [];
             const temProdutos = produtosCategoria.length > 0;
@@ -318,7 +382,7 @@ const Menu = () => {
               <section 
                 key={cat.nome} 
                 ref={categoryRefs.current[cat.nome]}
-                className="scroll-mt-28 sm:scroll-mt-32" // Offset responsivo para o scroll suave
+                className="scroll-mt-28 sm:scroll-mt-32"
               >
                 <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                   <span className="text-2xl sm:text-3xl">{cat.icone}</span>
@@ -344,6 +408,8 @@ const Menu = () => {
                       />
                     ))}
                   </div>
+                ) : cat.nome === 'Alaminuta' && !isAlaminutaTime() ? (
+                  <AlaminutaUnavailableMessage />
                 ) : (
                   <div className="text-center py-8 sm:py-12 bg-white rounded-lg sm:rounded-lg shadow-sm border-2 border-dashed border-gray-200">
                     <div className="text-4xl sm:text-6xl mb-3 sm:mb-4 opacity-50">{cat.icone}</div>
@@ -377,18 +443,17 @@ const Menu = () => {
         )}
 
         {/* Botão flutuante para voltar ao topo */}
-     <button
-  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-  className="fixed bottom-6 right-6 bg-gradient-to-r from-red-600 to-orange-500 text-white p-3 rounded-full shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300"
->
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-  </svg>
-</button>
-
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-6 right-6 bg-gradient-to-r from-red-600 to-orange-500 text-white p-3 rounded-full shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+          </svg>
+        </button>
       </div>
 
-      {/* Footer com créditos - Centralizado e melhorado */}
+      {/* Footer com créditos */}
       <div className="w-full flex justify-center py-4 sm:py-6 px-2">
         <div className="animate-fade-in-up w-full max-w-md">
           <div className="group relative">
@@ -440,12 +505,10 @@ const Menu = () => {
           animation: fade-in-up 0.6s ease-out;
         }
         
-        /* Esconder scrollbar para Chrome, Safari e Opera */
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
         
-        /* Esconder scrollbar para IE, Edge e Firefox */
         .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;
