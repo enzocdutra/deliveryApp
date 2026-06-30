@@ -20,7 +20,7 @@ export default function PrivateRoute({ children }) {
         } else {
           setIsValid(false);
         }
-      } catch (err) {
+      } catch {
         setIsValid(false);
       }
     };

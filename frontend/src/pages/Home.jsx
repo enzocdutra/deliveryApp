@@ -6,53 +6,51 @@ import Footer from '../components/Footer';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { CartContext } from '../Context/CartContext'; // ajuste o caminho se precisar
-
-const checkRestaurantOpen = () => {
-  const now = new Date();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  const openMinutes = 19 * 60;
-  const closeMinutes = 24 * 60 + 30;
-  return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
-};
+import { useStoreStatus } from '../hooks/useStoreStatus';
+import { getClosedStoreMessage } from '../lib/store-hours';
 
 const Home = () => {
   const { cart, addItemToCart, setCart } = useContext(CartContext);
   const [isCartOpen, setCartOpen] = useState(false);
+  const { storeOpen, statusMessage } = useStoreStatus();
 
   useEffect(() => {
     console.log("Carrinho atualizado (contexto):", cart);
   }, [cart]);
 
   const addToCart = (itemData) => {
-    if (!checkRestaurantOpen()) {
-      toast.error("Infelizmente estamos fechado", {
+    if (!storeOpen) {
+      toast.error(getClosedStoreMessage(), {
         position: "top-right",
         autoClose: 3000,
       });
-      return;
+      return false;
     }
 
     addItemToCart(itemData); // Aqui chama diretamente o contexto
+    return true;
   };
 
   const openCart = () => setCartOpen(true);
   const closeCart = () => setCartOpen(false);
 
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const totalPrice = cart.reduce((total, item) => total + item.finalPrice, 0);
 
   return (
-    <div className='w-full h-screen'>
-      <Header />
-      <Menu onAddToCart={addToCart} />
+    <div className='w-full min-h-screen bg-stone-950'>
+      <Header storeOpen={storeOpen} statusMessage={statusMessage} />
+      <Menu onAddToCart={addToCart} storeOpen={storeOpen} statusMessage={statusMessage} />
       <CartModal
         isOpen={isCartOpen}
         onClose={closeCart}
         cart={cart}
         setCart={setCart}
+        storeOpen={storeOpen}
       />
       <ToastContainer />
-      <div className='bg-gray-100'>
-      <Footer onCartClick={openCart} cartCount={cartCount} />
+      <div className='bg-stone-100'>
+      <Footer onCartClick={openCart} cartCount={cartCount} totalPrice={totalPrice} isCartOpen={isCartOpen} storeOpen={storeOpen} />
       </div>
     </div>
   );

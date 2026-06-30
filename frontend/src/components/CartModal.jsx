@@ -1,8 +1,9 @@
 // CartModal.jsx - VERSÃO CORRIGIDA WHATSAPP IPHONE/ANDROID
 import React, { useContext, useState, useEffect } from 'react';
 import { CartContext } from '../Context/CartContext';
+import { getClosedStoreMessage } from '../lib/store-hours';
 
-const CartModal = ({ isOpen, onClose }) => {
+const CartModal = ({ isOpen, onClose, storeOpen = false }) => {
   const { cart, removeItemFromCart, clearCart } = useContext(CartContext);
   const [deliveryType, setDeliveryType] = useState('retirar');
   const [address, setAddress] = useState('');
@@ -51,7 +52,7 @@ const CartModal = ({ isOpen, onClose }) => {
   };
 
   // FUNÇÃO UNIVERSAL PARA WHATSAPP - CORRIGIDA
-  const openWhatsAppUniversal = (message) => {
+  const OPEN_WHATSAPP_UNIVERSAL = (message) => {
     const phoneNumber = "555397082320";
     const encodedMessage = encodeURIComponent(message);
     
@@ -179,6 +180,12 @@ _Pedido via cardapiolaburguer.netlify.app_`;
     setAlertMessage('');
 
     try {
+      if (!storeOpen) {
+        showAlert(getClosedStoreMessage(), 'warning');
+        setIsSubmitting(false);
+        return;
+      }
+
       // Verificações básicas (lógica de horário removida)
       if (!cart.length) {
         showAlert("🛒 Seu carrinho está vazio!", 'warning');
@@ -306,6 +313,12 @@ _Pedido via cardapiolaburguer.netlify.app_`;
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
+          {!storeOpen && (
+            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">
+              {getClosedStoreMessage()}
+            </div>
+          )}
+
           {cart.length === 0 ? (
             <div className="text-center py-8">
               <div className="text-4xl mb-2">😔</div>
@@ -521,10 +534,12 @@ _Pedido via cardapiolaburguer.netlify.app_`;
             {/* Botão principal */}
             <button
               onClick={handleCheckout}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !storeOpen}
               className="w-full bg-red-600 text-white py-4 rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {isSubmitting ? (
+              {!storeOpen ? (
+                <>Pedidos disponíveis das 19h às 00h</>
+              ) : isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
                   Preparando Pedido...

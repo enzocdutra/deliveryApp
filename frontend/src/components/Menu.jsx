@@ -3,6 +3,7 @@ import ProductItem from './ProductItem';
 import ItemModal from './ItemModal';
 import { CartContext } from '../Context/CartContext';
 import { getProdutosByCategoria } from '../services/Services';
+import { getClosedStoreMessage } from '../lib/store-hours';
 
 const categorias = [
   { nome: 'Combos', titulo: 'Combos', icone: '🍱' },
@@ -17,7 +18,7 @@ const categorias = [
   { nome: 'Bebidas', titulo: 'Bebidas', icone: '🥤' },
 ];
 
-const Menu = () => {
+const Menu = ({ onAddToCart, storeOpen = false, statusMessage = '' }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const { addItemToCart } = useContext(CartContext);
   const [produtos, setProdutos] = useState({});
@@ -29,49 +30,7 @@ const Menu = () => {
   const categoryNavRef = useRef(null);
   const categoryRefs = useRef({});
 
-  // Função para verificar se está no horário das alaminutas (11h às 14h)
-  const isAlaminutaTime = useCallback(() => {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
-    const currentTime = currentHour + currentMinute / 60;
-    
-    // Horário das alaminutas: das 11h00 às 14h00
-    const startTime = 11; // 11:00
-    const endTime = 14;   // 14:00
-    
-    return currentTime >= startTime && currentTime < endTime;
-  }, []);
-
-  // Filtrar categorias baseado no horário
-  const getFilteredCategories = useCallback(() => {
-    const shouldShowAlaminuta = isAlaminutaTime();
-    
-    return categorias.filter(cat => {
-      if (cat.nome === 'Alaminuta') {
-        return shouldShowAlaminuta;
-      }
-      return true;
-    });
-  }, [isAlaminutaTime]);
-
-  const [filteredCategories, setFilteredCategories] = useState(getFilteredCategories());
-
-  // Atualizar categorias filtradas quando o horário mudar
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const newFilteredCategories = getFilteredCategories();
-      setFilteredCategories(newFilteredCategories);
-      
-      // Se a categoria ativa atual for Alaminuta e não estiver mais no horário,
-      // mudar para a primeira categoria disponível
-      if (activeCategory === 'Alaminuta' && !isAlaminutaTime()) {
-        setActiveCategory(newFilteredCategories[0]?.nome || 'Combos');
-      }
-    }, 60000); // Verifica a cada minuto
-
-    return () => clearInterval(interval);
-  }, [getFilteredCategories, isAlaminutaTime, activeCategory]);
+  const filteredCategories = categorias;
 
   // Verificar se precisa de scroll horizontal
   useEffect(() => {
@@ -197,9 +156,13 @@ const Menu = () => {
   const closeModal = useCallback(() => setSelectedProduct(null), []);
 
   const handleAddToCart = useCallback((itemData) => {
-    addItemToCart(itemData);
-    closeModal();
-  }, [addItemToCart, closeModal]);
+    const addItem = onAddToCart || addItemToCart;
+    const added = addItem(itemData);
+
+    if (added !== false) {
+      closeModal();
+    }
+  }, [addItemToCart, closeModal, onAddToCart]);
 
   // Skeleton Loading para melhor UX
   const ProductSkeleton = () => (
@@ -223,27 +186,6 @@ const Menu = () => {
         ))}
       </div>
     </section>
-  );
-
-  // Componente para mostrar mensagem quando alaminutas não estão disponíveis
-  const AlaminutaUnavailableMessage = () => (
-    <div className="text-center py-12 bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl shadow-sm border-2 border-dashed border-orange-200 mb-8">
-      <div className="text-6xl mb-4">⏰</div>
-      <h3 className="text-2xl font-bold text-orange-800 mb-2">
-        Alaminutas Disponíveis apenas no Horário de Almoço
-      </h3>
-      <p className="text-orange-600 text-lg mb-4">
-        Nosso cardápio de alaminutas está disponível das <strong>11h00 às 14h00</strong>
-      </p>
-      <div className="bg-white/80 rounded-lg p-4 inline-block">
-        <p className="text-gray-700 font-medium">
-          Horário atual: <span className="text-orange-600">{new Date().toLocaleTimeString('pt-BR', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          })}</span>
-        </p>
-      </div>
-    </div>
   );
 
   if (loading) {
@@ -289,25 +231,37 @@ const Menu = () => {
   }
 
   return (
-    <div id="menu" className="bg-gradient-to-br from-neutral-50 to-gray-100 min-h-screen">
+    <div id="menu" className="min-h-screen bg-stone-100">
       {/* Banner de atenção */}
-      <div className="p-4 text-center mb-6 bg-gradient-to-r from-red-800 to-red-600 shadow-lg">
+      <div className="border-y border-amber-300/40 bg-stone-950 px-4 py-4 text-center shadow-lg">
         <p className="text-white text-2xl font-bold mb-2">⚠️ Atenção!</p>
         <span className="text-lg text-white font-medium">
           Não fazemos trocas de condimentos - consideramos como adicional!
         </span>
       </div>
 
-      <div className="container mx-auto px-3 sm:px-4 py-6">
-        <header className="text-center mb-8 px-2">
+      <div className="container mx-auto max-w-7xl px-3 py-7 sm:px-5 sm:py-10">
+        <header className="mb-8 px-2">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold uppercase text-gray-900 mb-2 tracking-tight">
             Cardápio
           </h1>
-          <div className="w-24 h-1 bg-red-600 mx-auto mb-6"></div>
+          <div className="mb-4 h-1 w-24 bg-red-600"></div>
+          <div className={`rounded-2xl border p-4 text-sm font-bold shadow-sm ${
+            storeOpen
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+              : 'border-red-200 bg-red-50 text-red-800'
+          }`}>
+            <p>{storeOpen ? 'Aberto agora' : 'Fechado no momento'}</p>
+            <p className="mt-1 font-semibold">
+              {storeOpen
+                ? 'Pode montar seu pedido e finalizar pelo WhatsApp.'
+                : `${statusMessage || getClosedStoreMessage()} Você pode ver todos os itens, mas a compra fica bloqueada fora do horário.`}
+            </p>
+          </div>
         </header>
 
         {/* Menu de Navegação de Categorias - RESPONSIVO */}
-        <div className="sticky top-2 z-30 mb-8 sm:mb-12 bg-white/90 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-white/20 p-3 sm:p-4 mx-2">
+        <div className="sticky top-2 z-30 mb-8 rounded-2xl border border-stone-200 bg-white/95 p-3 shadow-xl backdrop-blur sm:mb-12 sm:p-4">
           <h2 className="text-base sm:text-lg font-semibold text-gray-700 text-center mb-3 sm:mb-4">
             Navegue pelas Categorias
           </h2>
@@ -405,11 +359,10 @@ const Menu = () => {
                         key={product.id} 
                         product={product} 
                         onSelect={openModal} 
+                        storeOpen={storeOpen}
                       />
                     ))}
                   </div>
-                ) : cat.nome === 'Alaminuta' && !isAlaminutaTime() ? (
-                  <AlaminutaUnavailableMessage />
                 ) : (
                   <div className="text-center py-8 sm:py-12 bg-white rounded-lg sm:rounded-lg shadow-sm border-2 border-dashed border-gray-200">
                     <div className="text-4xl sm:text-6xl mb-3 sm:mb-4 opacity-50">{cat.icone}</div>
@@ -439,6 +392,7 @@ const Menu = () => {
             itemCategory={selectedProduct.categoria}
             onClose={closeModal}
             onConfirm={handleAddToCart}
+            storeOpen={storeOpen}
           />
         )}
 
