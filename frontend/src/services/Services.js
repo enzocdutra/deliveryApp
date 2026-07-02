@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // URL do backend
-const API_URL = " http://localhost:3001"; 
+const API_URL = "https://backend-production-c06b.up.railway.app"; 
 
 // Função para pegar o token salvo
 const getToken = () => localStorage.getItem("token");

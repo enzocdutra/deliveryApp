@@ -21,7 +21,7 @@ const Header = ({ storeOpen = false, statusMessage = '' }) => {
           <div className="flex items-center gap-3">
             <img
               src={Logo}
-              alt="La Burguer"
+              alt="LaBurguer"
               className="h-14 w-14 rounded-full border-2 border-amber-300/70 object-cover shadow-xl sm:h-16 sm:w-16"
             />
             <div>

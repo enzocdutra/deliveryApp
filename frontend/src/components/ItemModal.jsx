@@ -5,10 +5,10 @@ import { getClosedStoreMessage } from '../lib/store-hours';
 
 const extrasOptions = {
   Proteinas: [
-    { id: 1, name: 'Bife de carne bovina', price: 10 },
-    { id: 2, name: 'Bife de frango', price: 9 },
-    { id: 3, name: 'Bacon', price: 7 },
-    { id: 4, name: 'Lombo canadense', price: 3 },
+    { id: 1, name: 'Bife de carne bovina', price: 12 },
+    { id: 2, name: 'Bife de frango', price: 10 },
+    { id: 3, name: 'Bacon', price: 8 },
+    { id: 4, name: 'Lombo canadense', price: 4 },
   ],
   Queijos: [
     { id: 5, name: 'Queijo mussarela', price: 4 },
@@ -18,7 +18,7 @@ const extrasOptions = {
     { id: 9, name: 'Catupiry', price: 4 },
   ],
   Molhos: [
-    { id: 10, name: 'Barbecue', price: 3 },
+    { id: 10, name: 'Barbecue', price: 4 },
     { id: 11, name: 'Geleia de pimenta', price: 6 },
     { id: 12, name: 'Geleia de abacaxi com pimenta', price: 6 },
     { id: 13, name: 'Geleia de morango com pimenta', price: 6 },
@@ -26,22 +26,22 @@ const extrasOptions = {
     { id: 15, name: 'Geleia de maracuja com pimenta', price: 6 },
   ],
   Vegetais: [
-    { id: 16, name: 'Pickles', price: 2 },
+    { id: 16, name: 'Pickles', price: 3 },
     { id: 17, name: 'Cebola roxa crua', price: 3 },
-    { id: 18, name: 'Cebola roxa caramelizada', price: 3 },
+    { id: 18, name: 'Cebola roxa caramelizada', price: 4 },
     { id: 19, name: 'Tomate', price: 3 },
     { id: 20, name: 'Alface', price: 3 },
-    { id: 21, name: 'Pimentoes', price: 2 },
-    { id: 22, name: 'Rucula', price: 2 },
+    { id: 21, name: 'Pimentoes', price: 3 },
+    { id: 22, name: 'Rucula', price: 3 },
   ],
   'Extras especiais': [
     { id: 23, name: 'Aneis de cebola', price: 5 },
     { id: 24, name: 'Doritos', price: 5 },
-    { id: 25, name: 'Abacaxi caramelizado', price: 4 },
-    { id: 26, name: 'Figo caramelizado', price: 4 },
+    { id: 25, name: 'Abacaxi caramelizado', price: 5 },
+    { id: 26, name: 'Figo caramelizado', price: 5 },
     { id: 27, name: 'Pessego', price: 4 },
-    { id: 28, name: 'Nutella', price: 4 },
-    { id: 29, name: 'Doce de leite', price: 4 },
+    { id: 28, name: 'Nutella', price: 3 },
+    { id: 29, name: 'Doce de leite', price: 3 },
   ],
 };
 
