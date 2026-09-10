@@ -7,7 +7,7 @@ import { getClosedStoreMessage } from '../lib/store-hours';
 
 const categorias = [
   { nome: 'Combos', titulo: 'Combos', icone: '🍱' },
-  { nome: 'Alaminuta', titulo: 'Alaminuta', icone: '🍱' },
+
   { nome: 'Normais', titulo: 'Normais', icone: '🍛' },
   { nome: 'Camarao', titulo: 'Camarão', icone: '🦐' },
   { nome: 'Duplos', titulo: 'Duplos', icone: '🥘' },
