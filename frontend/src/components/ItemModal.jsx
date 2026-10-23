@@ -2,20 +2,21 @@ import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { AlertCircle, Check, Minus, Plus, X } from 'lucide-react';
 import { getClosedStoreMessage } from '../lib/store-hours';
+import { isRodizio, rodizioFlavors, REQUIRED_FLAVORS } from '../lib/rodizio';
 
 const extrasOptions = {
   Proteinas: [
-    { id: 1, name: 'Bife de carne bovina', price: 12 },
-    { id: 2, name: 'Bife de frango', price: 10 },
+    { id: 1, name: 'Adicional de bife bovino', price: 14 },
+    { id: 2, name: 'Adicional de bife de frango', price: 12 },
     { id: 3, name: 'Bacon', price: 8 },
     { id: 4, name: 'Lombo canadense', price: 4 },
   ],
   Queijos: [
-    { id: 5, name: 'Queijo mussarela', price: 4 },
-    { id: 6, name: 'Queijo cheddar', price: 4 },
-    { id: 7, name: 'Queijo provolone', price: 4 },
-    { id: 8, name: 'Cheddar cremoso', price: 4 },
-    { id: 9, name: 'Catupiry', price: 4 },
+    { id: 5, name: 'Adicional de mussarela', price: 5 },
+    { id: 6, name: 'Cheddar fatia', price: 5 },
+    { id: 7, name: 'Adicional provolone', price: 5 },
+    { id: 8, name: 'Cheddar cremoso', price: 5 },
+    { id: 9, name: 'Adicional catupiry', price: 5 },
   ],
   Molhos: [
     { id: 10, name: 'Barbecue', price: 4 },
@@ -24,14 +25,15 @@ const extrasOptions = {
     { id: 13, name: 'Geleia de morango com pimenta', price: 6 },
     { id: 14, name: 'Geleia de uva com vinho', price: 6 },
     { id: 15, name: 'Geleia de maracuja com pimenta', price: 6 },
+    { id: 30, name: 'Pote de maionese', price: 3 },
   ],
   Vegetais: [
     { id: 16, name: 'Pickles', price: 3 },
-    { id: 17, name: 'Cebola roxa crua', price: 3 },
-    { id: 18, name: 'Cebola roxa caramelizada', price: 4 },
-    { id: 19, name: 'Tomate', price: 3 },
+    { id: 17, name: 'Cebola roxa crua', price: 5 },
+    { id: 18, name: 'Cebola roxa caramelizada', price: 5 },
+    { id: 19, name: 'Tomate', price: 4 },
     { id: 20, name: 'Alface', price: 3 },
-    { id: 21, name: 'Pimentoes', price: 3 },
+    { id: 21, name: 'Pimentões', price: 4 },
     { id: 22, name: 'Rucula', price: 3 },
   ],
   'Extras especiais': [
@@ -40,12 +42,14 @@ const extrasOptions = {
     { id: 25, name: 'Abacaxi caramelizado', price: 5 },
     { id: 26, name: 'Figo caramelizado', price: 5 },
     { id: 27, name: 'Pessego', price: 4 },
-    { id: 28, name: 'Nutella', price: 3 },
+    { id: 28, name: 'Nutella', price: 5 },
     { id: 29, name: 'Doce de leite', price: 3 },
   ],
 };
 
 const hamburgerCategories = ['Normais', 'Duplos', 'Camarao', 'Agridoce', 'AgridoceGeleia'];
+const maxHamburgerExtras = 3;
+const mayonnaiseExtraId = 30;
 
 const ItemModal = ({
   itemTitle,
@@ -61,6 +65,9 @@ const ItemModal = ({
   const [comments, setComments] = useState('');
   const [selectedExtras, setSelectedExtras] = useState([]);
   const [showExtrasWarning, setShowExtrasWarning] = useState(false);
+  const [selectedFlavors, setSelectedFlavors] = useState([]);
+  const isRodizioBox = isRodizio(itemTitle);
+  const flavorsComplete = !isRodizioBox || selectedFlavors.length === REQUIRED_FLAVORS;
 
   const numericPrice = useMemo(() => {
     if (typeof itemPrice === 'string') {
@@ -80,11 +87,16 @@ const ItemModal = ({
     [numericPrice, extrasTotal, quantity],
   );
 
-  const isHamburger = hamburgerCategories.includes(itemCategory);
+  const isHamburger = !isRodizioBox && hamburgerCategories.includes(itemCategory);
+  const selectedHamburgerExtrasCount = selectedExtras.filter(
+    (extra) => extra.id !== mayonnaiseExtraId,
+  ).length;
 
   const handleExtraChange = (extra, isChecked) => {
     if (isChecked) {
-      if (selectedExtras.length >= 2) {
+      const countsTowardsLimit = extra.id !== mayonnaiseExtraId;
+
+      if (countsTowardsLimit && selectedHamburgerExtrasCount >= maxHamburgerExtras) {
         setShowExtrasWarning(true);
         setTimeout(() => setShowExtrasWarning(false), 3000);
         return;
@@ -99,10 +111,11 @@ const ItemModal = ({
   };
 
   const handleConfirm = () => {
-    if (!storeOpen) return;
+    if (!storeOpen || !flavorsComplete) return;
 
     onConfirm({
       name: itemTitle,
+      flavors: isRodizioBox ? selectedFlavors : [],
       price: numericPrice,
       quantity,
       comments: comments.trim() === '' ? 'Nenhuma observacao' : comments,
@@ -152,19 +165,53 @@ const ItemModal = ({
             </div>
           )}
 
+          {isRodizioBox && (
+            <fieldset className="mb-6">
+              <legend className="text-lg font-black text-stone-950">Escolha 6 sabores diferentes</legend>
+              <p className="mt-1 text-sm text-stone-600">12 mini hambúrgueres + porção de fritas. Somente entrega ou retirada.</p>
+              <p className="my-3 font-bold text-red-700" aria-live="polite">
+                {selectedFlavors.length}/{REQUIRED_FLAVORS} sabores selecionados
+                {flavorsComplete ? ' — Tudo pronto!' : ` — Faltam ${REQUIRED_FLAVORS - selectedFlavors.length}`}
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {rodizioFlavors.map((flavor) => {
+                  const selected = selectedFlavors.includes(flavor.id);
+                  const disabled = !selected && selectedFlavors.length >= REQUIRED_FLAVORS;
+                  return (
+                    <label key={flavor.id} className={`flex items-start gap-3 rounded-xl border p-3 ${selected ? 'border-emerald-500 bg-emerald-50' : 'border-stone-200'} ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
+                      <input
+                        type="checkbox"
+                        className="mt-1 h-5 w-5 shrink-0 accent-emerald-600"
+                        checked={selected}
+                        disabled={disabled}
+                        onChange={() => setSelectedFlavors((previous) => previous.includes(flavor.id)
+                          ? previous.filter((id) => id !== flavor.id)
+                          : previous.length < REQUIRED_FLAVORS ? [...previous, flavor.id] : previous)}
+                      />
+                      <span>
+                        <span className="block text-sm font-bold text-stone-900">{flavor.name}</span>
+                        <span className="text-xs text-stone-600">{flavor.description}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
+          )}
+
           {isHamburger && (
             <div className="mb-6">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <h3 className="text-lg font-black text-stone-950">Adicionais</h3>
                 <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-bold text-stone-600">
-                  {selectedExtras.length}/2 selecionados
+                  {selectedHamburgerExtrasCount}/{maxHamburgerExtras} selecionados
                 </span>
               </div>
 
               {showExtrasWarning && (
                 <div className="mb-3 flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-800">
                   <AlertCircle size={16} />
-                  Voce pode selecionar apenas 2 adicionais.
+                  Voce pode selecionar apenas {maxHamburgerExtras} adicionais, alem do pote de maionese.
                 </div>
               )}
 
@@ -175,7 +222,10 @@ const ItemModal = ({
                     <div className="grid gap-2">
                       {extras.map((extra) => {
                         const isSelected = selectedExtras.some((item) => item.id === extra.id);
-                        const isDisabled = selectedExtras.length >= 2 && !isSelected;
+                        const countsTowardsLimit = extra.id !== mayonnaiseExtraId;
+                        const isDisabled = countsTowardsLimit
+                          && selectedHamburgerExtrasCount >= maxHamburgerExtras
+                          && !isSelected;
 
                         return (
                           <label
@@ -209,12 +259,6 @@ const ItemModal = ({
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-
-          {isHamburger && (
-            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">
-              Nao enviamos maionese a parte.
             </div>
           )}
 
@@ -267,14 +311,14 @@ const ItemModal = ({
             <button
               type="button"
               onClick={handleConfirm}
-              disabled={!storeOpen}
+              disabled={!storeOpen || !flavorsComplete}
               className={`min-h-12 rounded-full px-6 py-3 text-base font-black transition sm:min-w-56 ${
-                storeOpen
+                storeOpen && flavorsComplete
                   ? 'bg-red-600 text-white shadow-lg hover:bg-red-700 active:scale-95'
                   : 'cursor-not-allowed bg-stone-200 text-stone-500'
               }`}
             >
-              {storeOpen ? 'Adicionar ao pedido' : 'Fora do horario'}
+              {!storeOpen ? 'Fora do horario' : !flavorsComplete ? 'Escolha os 6 sabores' : 'Adicionar ao pedido'}
             </button>
           </div>
         </div>

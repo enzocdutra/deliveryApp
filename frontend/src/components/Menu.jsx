@@ -4,6 +4,17 @@ import ItemModal from './ItemModal';
 import { CartContext } from '../Context/CartContext';
 import { getProdutosByCategoria } from '../services/Services';
 import { getClosedStoreMessage } from '../lib/store-hours';
+import { isRodizio, RODIZIO_NAME } from '../lib/rodizio';
+import rodizioImage from '../assets/rodizio-na-caixa-lb.jpeg';
+
+const rodizioProduct = {
+  id: 'rodizio-na-caixa-lb',
+  nome: RODIZIO_NAME,
+  descricao: '12 mini hambúrgueres + porção de fritas. Escolha obrigatoriamente 6 sabores diferentes. Somente entrega ou retirada.',
+  preco: 140,
+  imagem: rodizioImage,
+  categoria: 'Combos',
+};
 
 const categorias = [
   { nome: 'Combos', titulo: 'Combos', icone: '🍱' },
@@ -83,7 +94,10 @@ const Menu = ({ onAddToCart, storeOpen = false, statusMessage = '' }) => {
 
       setProdutos(prev => ({
         ...prev,
-        [cat.nome]: produtosFormatados
+        [cat.nome]: cat.nome === 'Combos'
+          ? [rodizioProduct,
+            ...produtosFormatados.filter((product) => !isRodizio(product.nome))]
+          : produtosFormatados
       }));
 
     } catch (err) {
@@ -91,7 +105,7 @@ const Menu = ({ onAddToCart, storeOpen = false, statusMessage = '' }) => {
       // Fallback: categoria vazia em caso de erro
       setProdutos(prev => ({
         ...prev,
-        [cat.nome]: []
+        [cat.nome]: cat.nome === 'Combos' ? [rodizioProduct] : []
       }));
     } finally {
       setLoadingCategories(prev => {

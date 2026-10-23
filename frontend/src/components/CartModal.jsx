@@ -2,6 +2,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { CartContext } from '../Context/CartContext';
 import { getClosedStoreMessage } from '../lib/store-hours';
+import { flavorNames, hasValidRodizioFlavors } from '../lib/rodizio';
 
 const CartModal = ({ isOpen, onClose, storeOpen = false }) => {
   const { cart, removeItemFromCart, clearCart } = useContext(CartContext);
@@ -21,6 +22,7 @@ const CartModal = ({ isOpen, onClose, storeOpen = false }) => {
   const [whatsappMessage, setWhatsappMessage] = useState('');
   
   const total = cart.reduce((sum, item) => sum + item.finalPrice, 0);
+  const validFlavors = cart.every(hasValidRodizioFlavors);
 
   // Mostrar alerta temporário
   const showAlert = (message, type = 'error') => {
@@ -127,6 +129,10 @@ const CartModal = ({ isOpen, onClose, storeOpen = false }) => {
         text += `\n📦 Quantidade: *${item.quantity}*`;
         text += `\n💰 Valor: *R$ ${formatCurrency(item.finalPrice)}*`;
         
+        if (item.flavors?.length > 0) {
+          text += `\n*Sabores: ${flavorNames(item.flavors).join(', ')}*`;
+        }
+
         if (item.extras?.length > 0) {
           text += `\n*➕ Adicionais:*`;
           item.extras.forEach(extra => {
@@ -175,6 +181,10 @@ _Pedido via cardapiolaburguer.netlify.app_`;
 
   const handleCheckout = async () => {
     if (isSubmitting) return;
+    if (!validFlavors) {
+      showAlert('Escolha exatamente 6 sabores para cada Rodízio na caixa LB. Remova a caixa incompleta e adicione novamente.');
+      return;
+    }
     
     setIsSubmitting(true);
     setAlertMessage('');
@@ -253,6 +263,7 @@ _Pedido via cardapiolaburguer.netlify.app_`;
 
   // Função específica para copiar mensagem
   const handleCopyMessage = () => {
+    if (!validFlavors) return;
     if (whatsappMessage) {
       copyToClipboard(whatsappMessage);
     } else {
@@ -263,6 +274,7 @@ _Pedido via cardapiolaburguer.netlify.app_`;
 
   // Função para abrir WhatsApp manualmente
   const handleOpenWhatsAppManual = () => {
+    if (!validFlavors) return;
     const message = whatsappMessage || prepareOrderMessage();
     openWhatsAppReliable(message);
   };
@@ -335,6 +347,11 @@ _Pedido via cardapiolaburguer.netlify.app_`;
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-800">{item.name}</h3>
                         <p className="text-sm text-gray-600 mt-1">Quantidade: {item.quantity}</p>
+                        {item.flavors?.length > 0 && (
+                          <p className="mt-2 text-sm text-gray-700">
+                            <span className="font-semibold">Sabores:</span> {flavorNames(item.flavors).join(', ')}
+                          </p>
+                        )}
                         {item.extras?.length > 0 && (
                           <div className="mt-2">
                             <p className="text-xs font-medium text-gray-500">Adicionais:</p>
@@ -354,7 +371,7 @@ _Pedido via cardapiolaburguer.netlify.app_`;
                       <div className="text-right ml-4">
                         <p className="text-red-600 font-bold">R$ {formatCurrency(item.finalPrice)}</p>
                         <button
-                          onClick={() => removeItemFromCart(item.name, item.extrasTotal, item.comments)}
+                          onClick={() => removeItemFromCart(item.name, item.extrasTotal, item.comments, item.flavors)}
                           className="text-red-500 hover:text-red-700 text-sm mt-2 disabled:opacity-50"
                           disabled={isSubmitting}
                         >
@@ -531,10 +548,15 @@ _Pedido via cardapiolaburguer.netlify.app_`;
         {/* Footer */}
         {cart.length > 0 && (
           <div className="p-6 border-t border-gray-200 bg-gray-50 space-y-3">
+            {!validFlavors && (
+              <p role="alert" className="text-sm font-bold text-red-700">
+                Cada Rodízio na caixa LB precisa de exatamente 6 sabores. Remova a caixa incompleta e adicione novamente.
+              </p>
+            )}
             {/* Botão principal */}
             <button
               onClick={handleCheckout}
-              disabled={isSubmitting || !storeOpen}
+              disabled={isSubmitting || !storeOpen || !validFlavors}
               className="w-full bg-red-600 text-white py-4 rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {!storeOpen ? (

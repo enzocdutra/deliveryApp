@@ -27,8 +27,7 @@ const Home = () => {
       return false;
     }
 
-    addItemToCart(itemData); // Aqui chama diretamente o contexto
-    return true;
+    return addItemToCart(itemData);
   };
 
   const openCart = () => setCartOpen(true);
