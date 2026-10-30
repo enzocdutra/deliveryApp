@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { getProdutos, deleteProduto, updateProduto } from "../../services/Services";
+import { getProdutos, deleteProduto, updateProduto, updateProdutoStatus } from "../../services/Services";
 
 export default function AllProducts() {
   const [produtos, setProdutos] = useState([]);
@@ -11,6 +11,8 @@ export default function AllProducts() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [updatingStatusIds, setUpdatingStatusIds] = useState(new Set());
+  const [statusFeedback, setStatusFeedback] = useState(null);
   const [editFormData, setEditFormData] = useState({
     nome: "",
     descricao: "",
@@ -81,6 +83,35 @@ export default function AllProducts() {
   const goToPage = useCallback((pageNumber) => {
     setCurrentPage(pageNumber);
   }, []);
+
+  const handleToggleStatus = async (produto) => {
+    if (updatingStatusIds.has(produto.id)) return;
+
+    setUpdatingStatusIds(prev => new Set(prev).add(produto.id));
+    setStatusFeedback(null);
+    try {
+      const updatedProduct = await updateProdutoStatus(produto.id, produto.ativo === false);
+      setProdutos(prev => prev.map(p =>
+        p.id === produto.id ? { ...p, ativo: updatedProduct.ativo } : p
+      ));
+      setStatusFeedback({
+        error: false,
+        message: `Produto "${produto.nome}" ${updatedProduct.ativo ? 'ativado' : 'desativado'} no cardápio.`,
+      });
+    } catch (err) {
+      console.error("Erro ao alterar disponibilidade:", err);
+      setStatusFeedback({
+        error: true,
+        message: err.response?.data?.error || "Erro ao alterar disponibilidade. Tente novamente.",
+      });
+    } finally {
+      setUpdatingStatusIds(prev => {
+        const next = new Set(prev);
+        next.delete(produto.id);
+        return next;
+      });
+    }
+  };
 
   const handleDeleteClick = useCallback((produto) => {
     setProdutoToDelete(produto);
@@ -251,6 +282,15 @@ export default function AllProducts() {
         </Link>
       </div>
 
+      {statusFeedback && (
+        <p
+          role={statusFeedback.error ? "alert" : "status"}
+          className={`mb-4 rounded-lg px-4 py-3 text-sm ${statusFeedback.error ? 'bg-red-50 text-red-800' : 'bg-green-50 text-green-800'}`}
+        >
+          {statusFeedback.message}
+        </p>
+      )}
+
       {/* Filtros */}
       <div className="mb-6 bg-gray-50 p-4 rounded-xl">
         <div className="flex flex-wrap items-center gap-4">
@@ -358,6 +398,9 @@ export default function AllProducts() {
                     Preço
                   </th>
                   <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Cardápio
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Ações
                   </th>
                 </tr>
@@ -418,6 +461,22 @@ export default function AllProducts() {
                       </span>
                     </td>
                     
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col items-center gap-2">
+                        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${produto.ativo === false ? 'bg-gray-100 text-gray-600' : 'bg-green-100 text-green-800'}`}>
+                          {produto.ativo === false ? 'Inativo' : 'Ativo'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleStatus(produto)}
+                          disabled={updatingStatusIds.has(produto.id)}
+                          aria-label={`${produto.ativo === false ? 'Ativar' : 'Desativar'} ${produto.nome} no cardápio`}
+                          className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-wait disabled:opacity-50 ${produto.ativo === false ? 'border-green-200 bg-green-50 text-green-800 hover:bg-green-100' : 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100'}`}
+                        >
+                          {updatingStatusIds.has(produto.id) ? 'Salvando...' : produto.ativo === false ? 'Ativar' : 'Desativar'}
+                        </button>
+                      </div>
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex justify-center gap-2">
                         <button

@@ -94,6 +94,26 @@ export const updateProduct = async (req, res) => {
   }
 };
 
+// Alterar disponibilidade no cardápio
+export const updateProductStatus = async (req, res) => {
+  const { ativo } = req.body;
+
+  if (typeof ativo !== "boolean") {
+    return res.status(400).json({ error: "O campo ativo deve ser verdadeiro ou falso." });
+  }
+
+  try {
+    const product = await Product.setActive(req.params.id, ativo);
+    if (!product) {
+      return res.status(404).json({ error: "Produto não encontrado." });
+    }
+    res.json(product);
+  } catch (err) {
+    console.error("Erro ao alterar disponibilidade do produto:", err);
+    res.status(500).json({ error: "Erro ao alterar disponibilidade do produto." });
+  }
+};
+
 // Deletar
 export const deleteProduct = async (req, res) => {
   const { id } = req.params;

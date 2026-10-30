@@ -23,6 +23,12 @@ export async function setupDatabase() {
       )
     `);
 
+    // Mantém os produtos existentes ativos ao atualizar um banco já criado.
+    await pool.query(`
+      ALTER TABLE produtos
+      ADD COLUMN IF NOT EXISTS ativo BOOLEAN NOT NULL DEFAULT TRUE
+    `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS usuarios (
         id SERIAL PRIMARY KEY,

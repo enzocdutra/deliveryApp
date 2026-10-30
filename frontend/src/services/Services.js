@@ -62,7 +62,15 @@ export const updateProduto = async (id, produto) => {
   return response.data;
 };
 
-// Deletar produto - CORRIGIDO (mantido igual, está correto)
+// Alterar disponibilidade no cardápio
+export const updateProdutoStatus = async (id, ativo) => {
+  const response = await axios.patch(`${API_URL}/produtos/${id}/status`, { ativo }, {
+    headers: { Authorization: `Bearer ${getToken()}` },
+  });
+  return response.data;
+};
+
+// Deletar produto
 export const deleteProduto = async (id) => {
   const response = await axios.delete(`${API_URL}/produtos/${id}`, {
     headers: { Authorization: `Bearer ${getToken()}` },

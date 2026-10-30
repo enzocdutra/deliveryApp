@@ -34,6 +34,14 @@ export const remove = async (id) => {
   return { changes: result.rowCount };
 };
 
+export const setActive = async (id, ativo) => {
+  const result = await pool.query(
+    "UPDATE produtos SET ativo = $1 WHERE id = $2 RETURNING *",
+    [ativo, id]
+  );
+  return result.rows[0];
+};
+
 export const getByCategory = async (categoria) => {
   const result = await pool.query("SELECT * FROM produtos WHERE categoria = $1", [categoria]);
   return result.rows;

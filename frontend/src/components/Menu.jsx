@@ -83,7 +83,8 @@ const Menu = ({ onAddToCart, storeOpen = false, statusMessage = '' }) => {
       
       const data = await getProdutosByCategoria(cat.nome);
       
-      const produtosFormatados = data.map((item) => ({
+      const hasStoredRodizio = data.some((item) => isRodizio(item.nome));
+      const produtosFormatados = data.filter((item) => item.ativo !== false).map((item) => ({
         id: item.id || item._id || Math.random().toString(36).substr(2, 9),
         nome: item.nome || item.name || item.title || "Produto sem nome",
         descricao: item.descricao || item.description || "",
@@ -94,7 +95,7 @@ const Menu = ({ onAddToCart, storeOpen = false, statusMessage = '' }) => {
 
       setProdutos(prev => ({
         ...prev,
-        [cat.nome]: cat.nome === 'Combos'
+        [cat.nome]: cat.nome === 'Combos' && !hasStoredRodizio
           ? [rodizioProduct,
             ...produtosFormatados.filter((product) => !isRodizio(product.nome))]
           : produtosFormatados
